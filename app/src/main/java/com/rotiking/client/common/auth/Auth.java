@@ -113,6 +113,7 @@ public class Auth {
             JSONObject body = new JSONObject();
             try {
                 body.put("password", password);
+                body.put("package", context.getApplicationContext().getPackageName());
             } catch (JSONException e) {
                 promise.reject("Unable to signup.");
                 e.printStackTrace();

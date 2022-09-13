@@ -2,7 +2,7 @@
 
     <style name="Theme.RotiKing" parent="Theme.MaterialComponents.DayNight.NoActionBar">
         <item name="colorPrimary">@color/red</item>
-        <item name="colorPrimaryVariant">@color/white</item>
+        <item name="colorPrimaryVariant">@color/blackish_blue</item>
         <item name="colorOnPrimary">@color/brownish</item>
 
         <item name="colorSecondary">@color/red</item>
@@ -14,14 +14,23 @@
         <item name="android:windowContentTransitions">true</item>
     </style>
 
+    <style name="ImgTextLogo">
+        <item name="android:src">@drawable/text_logo_night</item>
+        <item name="contentDescription">@string/app_name</item>
+    </style>
+
+    <style name="BackgroundColor">
+        <item name="backgroundColor">@color/blackish_blue</item>
+    </style>
+
     <style name="Heading">
-        <item name="android:textColor">@color/black</item>
+        <item name="android:textColor">@color/white</item>
         <item name="android:textSize">35sp</item>
         <item name="android:textStyle">bold</item>
     </style>
 
     <style name="Text">
-        <item name="android:textColor">@color/black</item>
+        <item name="android:textColor">@color/white</item>
     </style>
 
     <style name="Button">
@@ -31,7 +40,7 @@
     </style>
 
     <style name="TextButton">
-        <item name="android:textColor">@color/brown</item>
+        <item name="android:textColor">@color/red</item>
         <item name="android:textSize">15sp</item>
         <item name="android:background">@drawable/text_button_design</item>
     </style>

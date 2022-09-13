@@ -4,7 +4,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".StarterActivity">
+    tools:context=".StarterActivity"
+    style="@style/BackgroundColor">
 
     <ImageView
         android:id="@+id/app_logo"
@@ -12,7 +13,8 @@
         android:layout_height="70dp"
         android:layout_centerInParent="true"
         android:scaleType="fitCenter"
-        android:src="@drawable/logo" />
+        android:src="@drawable/logo"
+        android:contentDescription="@string/app_name"/>
 
     <com.google.android.material.progressindicator.LinearProgressIndicator
         android:id="@+id/init_progress"
@@ -33,7 +35,7 @@
         android:layout_marginEnd="50dp"
         android:layout_marginBottom="50dp"
         android:scaleType="fitCenter"
-        android:src="@drawable/text_logo"
+        style="@style/ImgTextLogo"
         android:visibility="invisible"/>
 
 </RelativeLayout>
