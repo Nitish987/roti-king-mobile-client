@@ -1,0 +1,21 @@
+<resources>
+    <string name="app_name">Roti King</string>
+    <string name="have_a_great_lunch">Have a great lunch</string>
+    <string name="login">Login</string>
+    <string name="email">Email</string>
+    <string name="password">Password</string>
+    <string name="don_t_have_an_account_sign_up">Don\'t have an account? Sign up</string>
+    <string name="terms_privacy"><![CDATA[Terms & Conditions | Privacy Policy]]></string>
+    <string name="forget_password">Forget Password</string>
+    <string name="sign_up">Sign up</string>
+    <string name="full_name">Full Name</string>
+    <string name="continue_">Continue</string>
+    <string name="already_have_an_account_login">Already have an account? Login</string>
+    <string name="sign_up_password">Sign up Password</string>
+    <string name="otp_verification">OTP Verification</string>
+    <string name="otp">OTP</string>
+    <string name="confirm_password">Confirm Password</string>
+    <string name="verify">Verify</string>
+    <string name="by_signing_up_you_re_agree_to_our_terms_conditions_and_privacy_policy"><![CDATA[By Signing up, You\'re agree to our Terms & conditions and Privacy policy.]]></string>
+    <string name="enter_the_password">Enter the Password</string>
+</resources>
