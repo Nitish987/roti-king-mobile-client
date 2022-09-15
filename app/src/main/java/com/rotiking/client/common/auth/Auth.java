@@ -18,8 +18,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class Auth {
-    private static String AUTH_TOKEN = "";
-    private static String LOGIN_TOKEN = "";
+    public static String AUTH_TOKEN = "";
+    public static String LOGIN_TOKEN = "";
 
     public static boolean isUserAuthenticated(Context context) {
         AuthPreferences preferences = new AuthPreferences(context);
@@ -155,6 +155,7 @@ public class Auth {
                 body.put("email", email);
                 body.put("password", password);
                 body.put("device", Build.MODEL);
+                body.put("package", context.getApplicationContext().getPackageName());
             } catch (JSONException e) {
                 promise.reject("unable to Login.");
                 e.printStackTrace();
@@ -190,13 +191,11 @@ public class Auth {
             RequestQueue queue = Volley.newRequestQueue(context);
             promise.resolving(33, null);
 
-            JSONObject body = new JSONObject();
-
             promise.resolving(75, null);
             queue.add(new JsonObjectRequest(
                     Request.Method.GET,
                     url,
-                    body,
+                    null,
                     response -> {
                         promise.resolving(100, null);
                         promise.resolved(response);
