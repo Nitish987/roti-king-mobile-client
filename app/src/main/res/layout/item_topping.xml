@@ -7,6 +7,7 @@
     android:layout_margin="10dp">
 
     <LinearLayout
+        android:id="@+id/topping_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical">
@@ -23,16 +24,15 @@
                 android:scaleType="centerCrop" />
 
             <TextView
-                android:id="@+id/discount"
+                android:id="@+id/price"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:paddingHorizontal="5dp"
                 android:paddingVertical="2dp"
                 android:layout_marginHorizontal="10dp"
-                android:text="@string/_0_per"
+                android:text="@string/price"
                 android:textColor="@color/white"
                 android:background="@drawable/round_dark_bg"
-                android:backgroundTint="@color/green"
                 android:textSize="11sp"
                 android:textStyle="italic"
                 android:layout_alignParentBottom="true"

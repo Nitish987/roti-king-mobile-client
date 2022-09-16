@@ -1,5 +1,6 @@
 package com.rotiking.client.sheets;
 
+import android.content.Intent;
 import android.graphics.Paint;
 import android.os.Bundle;
 
@@ -16,8 +17,11 @@ import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.rotiking.client.CartActivity;
 import com.rotiking.client.R;
 import com.rotiking.client.adapters.ToppingItemRecyclerAdapter;
+import com.rotiking.client.common.auth.Auth;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -26,15 +30,16 @@ import org.json.JSONObject;
 public class FoodDetailBottomSheet extends BottomSheetDialogFragment {
     private View view;
     private ImageView photo;
-    private TextView name, foodType, description, includes, crossPrice, price, discount, ingredients, rating, available, quantityTxt;
+    private TextView name, foodType, description, includes, crossPrice, price, discount, ingredients, rating, available, quantityTxt, payableTxt;
     private AppCompatImageButton incQuantityBtn, decQuantityBtn;
-    private AppCompatButton priceBtn, cartBtn;
+    private AppCompatButton addToCartBtn, openCartBtn;
     private RecyclerView toppingsRV;
 
     private JSONObject food;
     public static JSONArray TOPPINGS;
     private int one_piece_price = 0;
     private int one_piece_price_before_discount = 0;
+    private int topping_price = 0;
     private int quantity = 1;
 
     public static FoodDetailBottomSheet newInstance(String food) {
@@ -79,10 +84,11 @@ public class FoodDetailBottomSheet extends BottomSheetDialogFragment {
         rating = view.findViewById(R.id.rating);
         available = view.findViewById(R.id.available);
         quantityTxt = view.findViewById(R.id.quantity);
+        payableTxt = view.findViewById(R.id.payable_price);
         incQuantityBtn = view.findViewById(R.id.inc_quantity);
         decQuantityBtn = view.findViewById(R.id.dec_quantity);
-        priceBtn = view.findViewById(R.id.price_order_btn);
-        cartBtn = view.findViewById(R.id.cart_btn);
+        addToCartBtn = view.findViewById(R.id.add_to_cart_btn);
+        openCartBtn = view.findViewById(R.id.open_cart_btn);
 
         crossPrice.setPaintFlags(crossPrice.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
 
@@ -116,7 +122,6 @@ public class FoodDetailBottomSheet extends BottomSheetDialogFragment {
             String inc_ = "Includes - " + food.getString("food_includes");
             includes.setText(inc_);
 
-
             if (food.getDouble("discount") == 0) {
                 discount.setVisibility(View.INVISIBLE);
                 crossPrice.setVisibility(View.GONE);
@@ -128,8 +133,12 @@ public class FoodDetailBottomSheet extends BottomSheetDialogFragment {
             }
 
             setPrice();
+            setPayablePrice();
 
-            ToppingItemRecyclerAdapter adapter = new ToppingItemRecyclerAdapter(TOPPINGS);
+            ToppingItemRecyclerAdapter adapter = new ToppingItemRecyclerAdapter(TOPPINGS, o -> {
+                topping_price = (Integer) o;
+                setPayablePrice();
+            });
             toppingsRV.setAdapter(adapter);
         } catch (JSONException e) {
             e.printStackTrace();
@@ -140,6 +149,7 @@ public class FoodDetailBottomSheet extends BottomSheetDialogFragment {
             setQuantity();
             setPrice();
             setCrossPrice();
+            setPayablePrice();
         });
 
         decQuantityBtn.setOnClickListener(view1 -> {
@@ -148,7 +158,23 @@ public class FoodDetailBottomSheet extends BottomSheetDialogFragment {
             setQuantity();
             setPrice();
             setCrossPrice();
+            setPayablePrice();
         });
+
+        addToCartBtn.setOnClickListener(view1 -> {
+
+        });
+
+        openCartBtn.setOnClickListener(view1 -> {
+            Intent intent = new Intent(view1.getContext(), CartActivity.class);
+            startActivity(intent);
+            dismiss();
+        });
+    }
+
+    private void setQuantity() {
+        String qua_ = Integer.toString(quantity);
+        quantityTxt.setText(qua_);
     }
 
     private void setPrice() {
@@ -161,8 +187,8 @@ public class FoodDetailBottomSheet extends BottomSheetDialogFragment {
         crossPrice.setText(cross_pri_);
     }
 
-    private void setQuantity() {
-        String qua_ = Integer.toString(quantity);
-        quantityTxt.setText(qua_);
+    private void setPayablePrice() {
+        String pri_ = "\u20B9 " + ((quantity * one_piece_price) + topping_price);
+        payableTxt.setText(pri_);
     }
 }

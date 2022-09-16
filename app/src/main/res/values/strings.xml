@@ -47,4 +47,5 @@
     <string name="_1">1</string>
     <string name="add_topping">Add Topping</string>
     <string name="go_to_cart">Go to cart</string>
+    <string name="total_price">Total Price :</string>
 </resources>

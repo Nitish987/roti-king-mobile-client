@@ -4,6 +4,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -11,15 +12,23 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.rotiking.client.R;
+import com.rotiking.client.utils.Pass;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-public class ToppingItemRecyclerAdapter extends RecyclerView.Adapter<ToppingItemRecyclerAdapter.ToppingsItemHolder> {
-    private final JSONArray toppings;
+import java.util.HashSet;
 
-    public ToppingItemRecyclerAdapter(JSONArray toppings) {
+public class ToppingItemRecyclerAdapter extends RecyclerView.Adapter<ToppingItemRecyclerAdapter.ToppingsItemHolder> {
+    public static HashSet<String> toppingIds;
+    private final JSONArray toppings;
+    private final Pass pass;
+    private static int TOTAL_TOPPINGS_PRICE = 0;
+
+    public ToppingItemRecyclerAdapter(JSONArray toppings, Pass pass) {
         this.toppings = toppings;
+        this.pass = pass;
+        toppingIds = new HashSet<>();
     }
 
     @NonNull
@@ -34,7 +43,28 @@ public class ToppingItemRecyclerAdapter extends RecyclerView.Adapter<ToppingItem
             JSONObject topping = toppings.getJSONObject(position);
             holder.setName(topping.getString(("name")));
             holder.setPhoto(topping.getString("photo"));
-            holder.setDiscount(topping.getInt(("discount")));
+
+            int price = topping.getInt("price");
+            holder.setPrice(price);
+
+            String toppingId = topping.getString("topping_id");
+            if (toppingIds.contains(toppingId)) {
+                holder.toppingLayout.setBackgroundColor(holder.itemView.getContext().getColor(R.color.green_transparent));
+            } else {
+                holder.toppingLayout.setBackgroundColor(holder.itemView.getContext().getColor(R.color.transparent));
+            }
+
+            holder.itemView.setOnClickListener(view -> {
+                if (toppingIds.contains(toppingId)) {
+                    toppingIds.remove(toppingId);
+                    TOTAL_TOPPINGS_PRICE -= price;
+                } else {
+                    toppingIds.add(toppingId);
+                    TOTAL_TOPPINGS_PRICE += price;
+                }
+                pass.on(TOTAL_TOPPINGS_PRICE);
+                notifyItemChanged(position);
+            });
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -47,13 +77,15 @@ public class ToppingItemRecyclerAdapter extends RecyclerView.Adapter<ToppingItem
 
     public static class ToppingsItemHolder extends RecyclerView.ViewHolder {
         private final ImageView photo;
-        private final TextView name, discount;
+        private final TextView name, price;
+        public final LinearLayout toppingLayout;
 
         public ToppingsItemHolder(@NonNull View itemView) {
             super(itemView);
             name = itemView.findViewById(R.id.name);
             photo = itemView.findViewById(R.id.photo);
-            discount = itemView.findViewById(R.id.discount);
+            price = itemView.findViewById(R.id.price);
+            toppingLayout = itemView.findViewById(R.id.topping_layout);
         }
 
         public void setName(String name) {
@@ -64,14 +96,9 @@ public class ToppingItemRecyclerAdapter extends RecyclerView.Adapter<ToppingItem
             if (!photo.equals("")) Glide.with(this.photo.getContext()).load(photo).into(this.photo);
         }
 
-        public void setDiscount(int discount) {
-            if (discount == 0) {
-                this.discount.setVisibility(View.INVISIBLE);
-            } else {
-                this.discount.setVisibility(View.VISIBLE);
-                String discount_ = discount + "% OFF" ;
-                this.discount.setText(discount_);
-            }
+        public void setPrice(int price) {
+            String price_= "\u20B9 " + price;
+            this.price.setText(price_);
         }
     }
 }
