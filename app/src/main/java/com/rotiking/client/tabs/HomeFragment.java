@@ -1,45 +1,36 @@
 package com.rotiking.client.tabs;
 
+import android.annotation.SuppressLint;
 import android.os.Bundle;
 
-import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
-import com.android.volley.AuthFailureError;
-import com.android.volley.Request;
-import com.android.volley.RequestQueue;
-import com.android.volley.toolbox.JsonObjectRequest;
-import com.android.volley.toolbox.Volley;
-
 import com.google.android.material.chip.ChipGroup;
 import com.google.android.material.progressindicator.CircularProgressIndicator;
 import com.rotiking.client.R;
 import com.rotiking.client.adapters.FoodCardRecyclerAdapter;
-import com.rotiking.client.common.auth.Auth;
+import com.rotiking.client.adapters.FoodItemRecyclerAdapter;
 import com.rotiking.client.common.db.OnlineDB;
-import com.rotiking.client.common.settings.ApiKey;
 import com.rotiking.client.utils.Promise;
 
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
-
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 public class HomeFragment extends Fragment {
     private View view;
-    private RecyclerView foodsRV;
+    private RecyclerView foodsCardRV, foodsRV;
     private CircularProgressIndicator foodCardProgress;
     private ChipGroup foodFilters;
+
+    private JSONArray foods;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -50,8 +41,12 @@ public class HomeFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         view = inflater.inflate(R.layout.fragment_home, container, false);
 
-        foodsRV = view.findViewById(R.id.food_cards_rv);
-        foodsRV.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
+        foodsCardRV = view.findViewById(R.id.food_cards_rv);
+        foodsCardRV.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
+        foodsCardRV.setHasFixedSize(true);
+
+        foodsRV = view.findViewById(R.id.food_item_rv);
+        foodsRV.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false));
         foodsRV.setHasFixedSize(true);
 
         foodCardProgress = view.findViewById(R.id.food_card_progress);
@@ -60,6 +55,7 @@ public class HomeFragment extends Fragment {
         return view;
     }
 
+    @SuppressLint("NonConstantResourceId")
     @Override
     public void onStart() {
         super.onStart();
@@ -67,6 +63,7 @@ public class HomeFragment extends Fragment {
             @Override
             public void resolving(int progress, String msg) {
                 foodCardProgress.setVisibility(View.VISIBLE);
+                foodFilters.setEnabled(false);
             }
 
             @Override
@@ -74,11 +71,17 @@ public class HomeFragment extends Fragment {
                 JSONObject response = (JSONObject) o;
                 try {
                     if (response.getBoolean("success")) {
-                        JSONArray foods = response.getJSONObject("data").getJSONArray("foods");
-                        foodCardProgress.setVisibility(View.GONE);
+                        foods = response.getJSONObject("data").getJSONArray("foods");
 
-                        FoodCardRecyclerAdapter adapter = new FoodCardRecyclerAdapter(foods);
-                        foodsRV.setAdapter(adapter);
+                        foodCardProgress.setVisibility(View.GONE);
+                        foodFilters.setEnabled(true);
+
+                        FoodCardRecyclerAdapter cardAdapter = new FoodCardRecyclerAdapter(foods);
+                        foodsCardRV.setAdapter(cardAdapter);
+
+                        JSONArray foodItems = performTop10FoodQuery();
+                        FoodItemRecyclerAdapter itemAdapter = new FoodItemRecyclerAdapter(foodItems);
+                        foodsRV.setAdapter(itemAdapter);
                     } else {
                         JSONObject errors = response.getJSONObject("data").getJSONObject("errors");
                         String key = errors.keys().next();
@@ -99,18 +102,60 @@ public class HomeFragment extends Fragment {
         });
 
         foodFilters.setOnCheckedStateChangeListener((group, checkedIds) -> {
-            if (group.getCheckedChipId() == R.id.all) {
-                Log.e("TAG", "onStart: All");
-            }
-            if (group.getCheckedChipId() == R.id.breakfast) {
-                Log.e("TAG", "onStart: Breakfast");
-            }
-            if (group.getCheckedChipId() == R.id.lunch) {
-                Log.e("TAG", "onStart: Lunch");
-            }
-            if (group.getCheckedChipId() == R.id.dinner) {
-                Log.e("TAG", "onStart: Dinner");
+            switch (group.getCheckedChipId()) {
+                case R.id.breakfast:
+                    JSONArray breakfast = performFoodCardQuery("breakfast");
+                    foodsCardRV.swapAdapter(new FoodCardRecyclerAdapter(breakfast), true);
+                    break;
+
+                case R.id.lunch:
+                    JSONArray lunch = performFoodCardQuery("lunch");
+                    foodsCardRV.swapAdapter(new FoodCardRecyclerAdapter(lunch), true);
+                    break;
+
+                case R.id.dinner:
+                    JSONArray dinner = performFoodCardQuery("dinner");
+                    foodsCardRV.swapAdapter(new FoodCardRecyclerAdapter(dinner), true);
+                    break;
+
+                default:
+                    foodsCardRV.swapAdapter(new FoodCardRecyclerAdapter(foods), true);
+                    break;
             }
         });
+    }
+
+    private JSONArray performFoodCardQuery(String filter) {
+        JSONArray query = new JSONArray();
+        for (int i = 0; i < foods.length(); i++) {
+            try {
+                JSONObject f = foods.getJSONObject(i);
+                if (f.getString("food_type").equals(filter)) {
+                    query.put(f);
+                }
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+        return query;
+    }
+
+    private JSONArray performTop10FoodQuery() {
+        int limit = 10;
+        JSONArray query = new JSONArray();
+        for (int i = 0; i < foods.length(); i++) {
+            try {
+                if (limit == 0) break;
+
+                JSONObject f = foods.getJSONObject(i);
+                if (f.getDouble("rating") >= 3.5) {
+                    query.put(f);
+                    limit--;
+                }
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+        return query;
     }
 }

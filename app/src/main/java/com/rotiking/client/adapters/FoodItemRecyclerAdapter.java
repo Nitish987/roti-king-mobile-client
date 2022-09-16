@@ -16,27 +16,27 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public class FoodCardRecyclerAdapter extends RecyclerView.Adapter<FoodCardRecyclerAdapter.FoodCardHolder> {
+public class FoodItemRecyclerAdapter extends RecyclerView.Adapter<FoodItemRecyclerAdapter.FoodItemHolder> {
     private final JSONArray foods;
 
-    public FoodCardRecyclerAdapter(JSONArray foods) {
+    public FoodItemRecyclerAdapter(JSONArray foods) {
         this.foods = foods;
     }
 
     @NonNull
     @Override
-    public FoodCardHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        return new FoodCardHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.item_food_card, parent, false));
+    public FoodItemRecyclerAdapter.FoodItemHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        return new FoodItemRecyclerAdapter.FoodItemHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.item_food, parent, false));
     }
 
     @Override
-    public void onBindViewHolder(@NonNull FoodCardHolder holder, int position) {
+    public void onBindViewHolder(@NonNull FoodItemRecyclerAdapter.FoodItemHolder holder, int position) {
         try {
             JSONObject food = foods.getJSONObject(position);
             holder.setPhoto(food.getString("photo"));
             holder.setName(food.getString("name"));
             holder.setType(food.getString("food_type"));
-            holder.setPrice(food.getInt("price"), food.getInt(("discount")));
+            holder.setPrice(food.getInt("price"), food.getInt("discount"));
             holder.setRating(food.getDouble("rating"));
         } catch (JSONException e) {
             e.printStackTrace();
@@ -48,11 +48,11 @@ public class FoodCardRecyclerAdapter extends RecyclerView.Adapter<FoodCardRecycl
         return foods.length();
     }
 
-    public static class FoodCardHolder extends RecyclerView.ViewHolder {
+    public static class FoodItemHolder extends RecyclerView.ViewHolder {
         private final ImageView photo;
         private final TextView name, type, price, rating, discount;
 
-        public FoodCardHolder(@NonNull View itemView) {
+        public FoodItemHolder(@NonNull View itemView) {
             super(itemView);
             photo = itemView.findViewById(R.id.photo);
             name = itemView.findViewById(R.id.name);

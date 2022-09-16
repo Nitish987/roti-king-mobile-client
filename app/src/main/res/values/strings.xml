@@ -37,4 +37,7 @@
     <string name="_0">0</string>
     <string name="all">All</string>
     <string name="top_tens">Top tens</string>
+    <string name="food">food</string>
+    <string name="rating">rating</string>
+    <string name="_0_per">-0%</string>
 </resources>
