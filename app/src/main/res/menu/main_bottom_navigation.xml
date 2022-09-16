@@ -7,9 +7,9 @@
         android:icon="@drawable/ic_outline_home_24"
         android:title="@string/home" />
     <item
-        android:id="@+id/recent"
+        android:id="@+id/orders"
         android:icon="@drawable/ic_baseline_receipt_long_24"
-        android:title="@string/recent" />
+        android:title="@string/orders" />
     <item
         android:id="@+id/profile"
         android:icon="@drawable/ic_outline_account_circle_24"

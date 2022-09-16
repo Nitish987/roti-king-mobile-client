@@ -7,10 +7,12 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.fragment.app.FragmentManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.rotiking.client.R;
+import com.rotiking.client.sheets.FoodDetailBottomSheet;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -18,9 +20,11 @@ import org.json.JSONObject;
 
 public class FoodItemRecyclerAdapter extends RecyclerView.Adapter<FoodItemRecyclerAdapter.FoodItemHolder> {
     private final JSONArray foods;
+    private final FragmentManager fragmentManager;
 
-    public FoodItemRecyclerAdapter(JSONArray foods) {
+    public FoodItemRecyclerAdapter(JSONArray foods, FragmentManager fragmentManager) {
         this.foods = foods;
+        this.fragmentManager = fragmentManager;
     }
 
     @NonNull
@@ -38,6 +42,8 @@ public class FoodItemRecyclerAdapter extends RecyclerView.Adapter<FoodItemRecycl
             holder.setType(food.getString("food_type"));
             holder.setPrice(food.getInt("price"), food.getInt("discount"));
             holder.setRating(food.getDouble("rating"));
+
+            holder.itemView.setOnClickListener(view -> FoodDetailBottomSheet.newInstance(food.toString()).show(fragmentManager, "FOOD_DETAIL_DIALOG"));
         } catch (JSONException e) {
             e.printStackTrace();
         }

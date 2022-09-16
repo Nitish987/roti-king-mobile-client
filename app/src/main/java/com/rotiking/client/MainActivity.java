@@ -10,7 +10,7 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.rotiking.client.common.auth.Auth;
 import com.rotiking.client.tabs.HomeFragment;
 import com.rotiking.client.tabs.ProfileFragment;
-import com.rotiking.client.tabs.RecentFragment;
+import com.rotiking.client.tabs.OrdersFragment;
 
 public class MainActivity extends AppCompatActivity {
     private BottomNavigationView tabs;
@@ -39,8 +39,8 @@ public class MainActivity extends AppCompatActivity {
                 case R.id.home:
                     getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, new HomeFragment()).commit();
                     break;
-                case R.id.recent:
-                    getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, new RecentFragment()).commit();
+                case R.id.orders:
+                    getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, new OrdersFragment()).commit();
                     break;
                 case R.id.profile:
                     getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, new ProfileFragment()).commit();

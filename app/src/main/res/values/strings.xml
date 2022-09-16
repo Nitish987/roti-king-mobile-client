@@ -22,7 +22,7 @@
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="home">Home</string>
-    <string name="recent">Recent</string>
+    <string name="orders">Orders</string>
     <string name="profile">Profile</string>
     <string name="welcome_back">Welcome Back!</string>
     <string name="hello">Hello</string>
@@ -40,4 +40,11 @@
     <string name="food">food</string>
     <string name="rating">rating</string>
     <string name="_0_per">-0%</string>
+    <string name="description_about_the_food_item">Description about the food item.</string>
+    <string name="ingredients">Ingredients -</string>
+    <string name="includes">includes -</string>
+    <string name="available">Available</string>
+    <string name="_1">1</string>
+    <string name="add_topping">Add Topping</string>
+    <string name="go_to_cart">Go to cart</string>
 </resources>

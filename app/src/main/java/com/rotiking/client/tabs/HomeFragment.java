@@ -17,7 +17,8 @@ import com.google.android.material.progressindicator.CircularProgressIndicator;
 import com.rotiking.client.R;
 import com.rotiking.client.adapters.FoodCardRecyclerAdapter;
 import com.rotiking.client.adapters.FoodItemRecyclerAdapter;
-import com.rotiking.client.common.db.OnlineDB;
+import com.rotiking.client.common.db.Database;
+import com.rotiking.client.sheets.FoodDetailBottomSheet;
 import com.rotiking.client.utils.Promise;
 
 import org.json.JSONArray;
@@ -59,7 +60,7 @@ public class HomeFragment extends Fragment {
     @Override
     public void onStart() {
         super.onStart();
-        OnlineDB.readFoodItems(view.getContext(), new Promise() {
+        Database.getFoodItems(view.getContext(), new Promise() {
             @Override
             public void resolving(int progress, String msg) {
                 foodCardProgress.setVisibility(View.VISIBLE);
@@ -76,11 +77,11 @@ public class HomeFragment extends Fragment {
                         foodCardProgress.setVisibility(View.GONE);
                         foodFilters.setEnabled(true);
 
-                        FoodCardRecyclerAdapter cardAdapter = new FoodCardRecyclerAdapter(foods);
+                        FoodCardRecyclerAdapter cardAdapter = new FoodCardRecyclerAdapter(foods, getParentFragmentManager());
                         foodsCardRV.setAdapter(cardAdapter);
 
                         JSONArray foodItems = performTop10FoodQuery();
-                        FoodItemRecyclerAdapter itemAdapter = new FoodItemRecyclerAdapter(foodItems);
+                        FoodItemRecyclerAdapter itemAdapter = new FoodItemRecyclerAdapter(foodItems, getParentFragmentManager());
                         foodsRV.setAdapter(itemAdapter);
                     } else {
                         JSONObject errors = response.getJSONObject("data").getJSONObject("errors");
@@ -105,22 +106,51 @@ public class HomeFragment extends Fragment {
             switch (group.getCheckedChipId()) {
                 case R.id.breakfast:
                     JSONArray breakfast = performFoodCardQuery("breakfast");
-                    foodsCardRV.swapAdapter(new FoodCardRecyclerAdapter(breakfast), true);
+                    foodsCardRV.swapAdapter(new FoodCardRecyclerAdapter(breakfast, getParentFragmentManager()), true);
                     break;
 
                 case R.id.lunch:
                     JSONArray lunch = performFoodCardQuery("lunch");
-                    foodsCardRV.swapAdapter(new FoodCardRecyclerAdapter(lunch), true);
+                    foodsCardRV.swapAdapter(new FoodCardRecyclerAdapter(lunch, getParentFragmentManager()), true);
                     break;
 
                 case R.id.dinner:
                     JSONArray dinner = performFoodCardQuery("dinner");
-                    foodsCardRV.swapAdapter(new FoodCardRecyclerAdapter(dinner), true);
+                    foodsCardRV.swapAdapter(new FoodCardRecyclerAdapter(dinner, getParentFragmentManager()), true);
                     break;
 
                 default:
-                    foodsCardRV.swapAdapter(new FoodCardRecyclerAdapter(foods), true);
+                    foodsCardRV.swapAdapter(new FoodCardRecyclerAdapter(foods, getParentFragmentManager()), true);
                     break;
+            }
+        });
+
+        Database.getToppingItems(view.getContext(), new Promise() {
+            @Override
+            public void resolving(int progress, String msg) {}
+
+            @Override
+            public void resolved(Object o) {
+                JSONObject response = (JSONObject) o;
+                try {
+                    if (response.getBoolean("success")) {
+                        FoodDetailBottomSheet.TOPPINGS = response.getJSONObject("data").getJSONArray("toppings");
+                    } else {
+                        JSONObject errors = response.getJSONObject("data").getJSONObject("errors");
+                        String key = errors.keys().next();
+                        JSONArray array = errors.getJSONArray(key);
+
+                        Toast.makeText(view.getContext(), array.getString(0), Toast.LENGTH_LONG).show();
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    Toast.makeText(view.getContext(), "something went wrong.", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void reject(String err) {
+                Toast.makeText(view.getContext(), "something went wrong.", Toast.LENGTH_SHORT).show();
             }
         });
     }
