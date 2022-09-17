@@ -20,15 +20,16 @@ import org.json.JSONObject;
 import java.util.HashSet;
 
 public class ToppingItemRecyclerAdapter extends RecyclerView.Adapter<ToppingItemRecyclerAdapter.ToppingsItemHolder> {
-    public static HashSet<String> toppingIds;
     private final JSONArray toppings;
     private final Pass pass;
-    private static int TOTAL_TOPPINGS_PRICE = 0;
+    public static HashSet<String> toppingIds;
+    private static int TOTAL_TOPPINGS_PRICE;
 
     public ToppingItemRecyclerAdapter(JSONArray toppings, Pass pass) {
         this.toppings = toppings;
         this.pass = pass;
         toppingIds = new HashSet<>();
+        TOTAL_TOPPINGS_PRICE = 0;
     }
 
     @NonNull

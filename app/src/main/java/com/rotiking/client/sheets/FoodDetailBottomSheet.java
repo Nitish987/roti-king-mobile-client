@@ -14,18 +14,22 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
-import com.google.firebase.firestore.FirebaseFirestore;
 import com.rotiking.client.CartActivity;
 import com.rotiking.client.R;
 import com.rotiking.client.adapters.ToppingItemRecyclerAdapter;
-import com.rotiking.client.common.auth.Auth;
+import com.rotiking.client.common.db.Database;
+import com.rotiking.client.utils.Promise;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class FoodDetailBottomSheet extends BottomSheetDialogFragment {
     private View view;
@@ -162,7 +166,40 @@ public class FoodDetailBottomSheet extends BottomSheetDialogFragment {
         });
 
         addToCartBtn.setOnClickListener(view1 -> {
+            try {
+                List<String> toppingIds = new ArrayList<>(ToppingItemRecyclerAdapter.toppingIds);
+                Database.addToCart(view1.getContext(), food.getString("food_id"), quantity, toppingIds, new Promise() {
+                    @Override
+                    public void resolving(int progress, String msg) {}
 
+                    @Override
+                    public void resolved(Object o) {
+                        JSONObject response = (JSONObject) o;
+                        try {
+                            if (response.getBoolean("success")) {
+                                String message = response.getJSONObject("data").getString("message");
+                                Toast.makeText(view.getContext(), message, Toast.LENGTH_SHORT).show();
+                            } else {
+                                JSONObject errors = response.getJSONObject("data").getJSONObject("errors");
+                                String key = errors.keys().next();
+                                JSONArray array = errors.getJSONArray(key);
+
+                                Toast.makeText(view.getContext(), array.getString(0), Toast.LENGTH_LONG).show();
+                            }
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                            Toast.makeText(view.getContext(), "something went wrong.", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+
+                    @Override
+                    public void reject(String err) {
+                        Toast.makeText(view.getContext(), "something went wrong.", Toast.LENGTH_SHORT).show();
+                    }
+                });
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
         });
 
         openCartBtn.setOnClickListener(view1 -> {
