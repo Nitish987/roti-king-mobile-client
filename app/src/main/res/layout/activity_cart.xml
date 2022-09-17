@@ -19,7 +19,8 @@
             android:layout_height="wrap_content"
             android:layout_alignParentStart="true"
             android:layout_centerVertical="true"
-            style="@style/ImgTextLogo" />
+            style="@style/ImgTextLogo"
+            android:contentDescription="@string/app_name"/>
 
         <ImageButton
             android:id="@+id/close"
@@ -66,12 +67,46 @@
     <LinearLayout
         android:id="@+id/order_desk"
         android:layout_width="match_parent"
-        android:layout_height="200sp"
-        android:orientation="vertical"
+        android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:background="@drawable/bottom_sheet_bg"
-        android:elevation="10dp">
+        android:elevation="20dp"
+        android:orientation="vertical"
+        android:padding="15dp">
 
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:text="@string/total_price"
+                android:textSize="15sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/total_cart_price"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:text="@string/_0"
+                android:textSize="15sp"
+                android:textStyle="bold"
+                android:gravity="end"
+                android:paddingHorizontal="10dp"/>
+
+        </LinearLayout>
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/checkout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/checkout"
+            style="@style/Button"
+            android:layout_marginTop="20sp"/>
 
     </LinearLayout>
 

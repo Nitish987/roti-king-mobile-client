@@ -140,7 +140,7 @@ public class FoodDetailBottomSheet extends BottomSheetDialogFragment {
             setPayablePrice();
 
             ToppingItemRecyclerAdapter adapter = new ToppingItemRecyclerAdapter(TOPPINGS, o -> {
-                topping_price = (Integer) o;
+                topping_price = (Integer) o[0];
                 setPayablePrice();
             });
             toppingsRV.setAdapter(adapter);
