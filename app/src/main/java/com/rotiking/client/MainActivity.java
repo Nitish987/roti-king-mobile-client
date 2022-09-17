@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
+import android.widget.ImageButton;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.rotiking.client.common.auth.Auth;
@@ -14,6 +15,7 @@ import com.rotiking.client.tabs.OrdersFragment;
 
 public class MainActivity extends AppCompatActivity {
     private BottomNavigationView tabs;
+    private ImageButton cartBtn;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -28,6 +30,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
         tabs = findViewById(R.id.tabs);
+        cartBtn = findViewById(R.id.cart);
     }
 
     @SuppressLint("NonConstantResourceId")
@@ -47,6 +50,11 @@ public class MainActivity extends AppCompatActivity {
                     break;
             }
             return true;
+        });
+
+        cartBtn.setOnClickListener(view -> {
+            Intent intent = new Intent(this, CartActivity.class);
+            startActivity(intent);
         });
     }
 }

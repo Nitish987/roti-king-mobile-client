@@ -26,11 +26,11 @@
             android:id="@+id/cart"
             android:layout_width="40dp"
             android:layout_height="40dp"
-            android:background="@color/transparent"
-            android:src="@drawable/ic_outline_shopping_bag_24"
-            android:layout_centerVertical="true"
             android:layout_alignParentEnd="true"
-            android:contentDescription="@string/cart" />
+            android:layout_centerVertical="true"
+            android:background="@color/transparent"
+            android:contentDescription="@string/cart"
+            android:src="@drawable/ic_outline_shopping_bag_24" />
 
     </RelativeLayout>
 

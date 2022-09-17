@@ -49,4 +49,6 @@
     <string name="go_to_cart">Go to Cart</string>
     <string name="total_price">Total Price :</string>
     <string name="add_to_cart">Add to Cart</string>
+    <string name="my">My</string>
+    <string name="cart_list">Cart List</string>
 </resources>

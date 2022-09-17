@@ -75,6 +75,8 @@ public class Database {
             cartItem.put("food_id", foodId);
             cartItem.put("quantity", quantity);
             cartItem.put("topping_ids", toppingIds.isEmpty() ? "None" : String.join(",", toppingIds));
+
+            promise.resolving(50, null);
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -83,6 +85,30 @@ public class Database {
                 Request.Method.POST,
                 ApiKey.REQUEST_API_URL + "client/add-to-cart/",
                 cartItem,
+                response -> {
+                    promise.resolving(100, null);
+                    promise.resolved(response);
+                },
+                error -> promise.reject(error.getMessage())
+        ) {
+            @Override
+            public Map<String, String> getHeaders() {
+                Map<String, String> headers = new HashMap<>();
+                headers.put("RAK", ApiKey.REQUEST_API_KEY);
+                headers.put("AT", Auth.AUTH_TOKEN);
+                headers.put("LT", Auth.LOGIN_TOKEN);
+                return headers;
+            }
+        });
+    }
+
+    public static void getCartItems(Context context, Promise promise) {
+        promise.resolving(0, null);
+        RequestQueue queue = Volley.newRequestQueue(context);
+        queue.add(new JsonObjectRequest(
+                Request.Method.GET,
+                ApiKey.REQUEST_API_URL + "client/my-cart-list/",
+                null,
                 response -> {
                     promise.resolving(100, null);
                     promise.resolved(response);
