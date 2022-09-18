@@ -60,7 +60,7 @@ public class CheckoutActivity extends AppCompatActivity {
         totalPayableTxt.setText(tp);
 
         orderBtn.setOnClickListener(view -> {
-
+            // TODO
         });
 
         closeBtn.setOnClickListener(view -> finish());
