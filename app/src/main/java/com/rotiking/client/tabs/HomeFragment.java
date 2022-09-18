@@ -7,6 +7,7 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,10 +15,12 @@ import android.widget.Toast;
 
 import com.google.android.material.chip.ChipGroup;
 import com.google.android.material.progressindicator.CircularProgressIndicator;
+import com.google.gson.Gson;
 import com.rotiking.client.R;
 import com.rotiking.client.adapters.FoodCardRecyclerAdapter;
 import com.rotiking.client.adapters.FoodItemRecyclerAdapter;
 import com.rotiking.client.common.db.Database;
+import com.rotiking.client.models.Food;
 import com.rotiking.client.sheets.FoodDetailBottomSheet;
 import com.rotiking.client.utils.Promise;
 
@@ -98,7 +101,7 @@ public class HomeFragment extends Fragment {
 
             @Override
             public void reject(String err) {
-                Toast.makeText(view.getContext(), "something went wrong.", Toast.LENGTH_SHORT).show();
+                Toast.makeText(view.getContext(), err, Toast.LENGTH_SHORT).show();
             }
         });
 
@@ -150,7 +153,7 @@ public class HomeFragment extends Fragment {
 
             @Override
             public void reject(String err) {
-                Toast.makeText(view.getContext(), "something went wrong.", Toast.LENGTH_SHORT).show();
+                Toast.makeText(view.getContext(), err, Toast.LENGTH_SHORT).show();
             }
         });
     }

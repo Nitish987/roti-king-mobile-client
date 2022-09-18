@@ -19,16 +19,17 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 
 public class CartItemRecyclerAdapter extends RecyclerView.Adapter<CartItemRecyclerAdapter.CartItemHolder> {
     private final JSONArray cartItems;
+    private int totalCartPrice;
     private final Pass pass;
-    private static HashSet<String> REMOVED_CART_ITEM;
+    public static HashSet<String> REMOVED_CART_ITEM;
 
-    public CartItemRecyclerAdapter(JSONArray cartItems, Pass pass) {
+    public CartItemRecyclerAdapter(JSONArray cartItems, int totalCartPrice, Pass pass) {
         this.cartItems = cartItems;
+        this.totalCartPrice = totalCartPrice;
         this.pass = pass;
         REMOVED_CART_ITEM = new HashSet<>();
     }
@@ -69,12 +70,13 @@ public class CartItemRecyclerAdapter extends RecyclerView.Adapter<CartItemRecycl
                 if (REMOVED_CART_ITEM.contains(itemId)) {
                     holder.removeCartItemBtn.setImageResource(R.drawable.ic_baseline_check_24);
                     REMOVED_CART_ITEM.remove(itemId);
-                    pass.on(price, true);
+                    totalCartPrice += price;
                 } else {
                     holder.removeCartItemBtn.setImageResource(R.drawable.ic_baseline_close_24);
                     REMOVED_CART_ITEM.add(itemId);
-                    pass.on(price, false);
+                    totalCartPrice -= price;
                 }
+                pass.on(totalCartPrice);
                 notifyItemChanged(position);
             });
         } catch (JSONException e) {
