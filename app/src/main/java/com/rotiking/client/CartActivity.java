@@ -20,6 +20,8 @@ import com.rotiking.client.utils.Promise;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -29,6 +31,7 @@ public class CartActivity extends AppCompatActivity {
     private AppCompatButton checkoutBtn;
     private TextView totalCartPriceTxt;
 
+    private List<CartItem> cartItems;
     private int total_cart_price = 0;
 
     @Override
@@ -60,7 +63,7 @@ public class CartActivity extends AppCompatActivity {
             public void resolved(JSONObject data) {
                 try {
                     Gson gson = new Gson();
-                    List<CartItem> cartItems = Arrays.asList(gson.fromJson(data.getJSONArray("cart").toString(), CartItem[].class));
+                    cartItems = Arrays.asList(gson.fromJson(data.getJSONArray("cart").toString(), CartItem[].class));
                     total_cart_price = data.getInt("total_cart_price");
 
                     String pri_ = "\u20B9 " + total_cart_price;
@@ -84,9 +87,15 @@ public class CartActivity extends AppCompatActivity {
         });
 
         checkoutBtn.setOnClickListener(view -> {
+            List<CartItem> newCartList = new ArrayList<>();
+            for (CartItem item : cartItems) {
+                if (!CartItemRecyclerAdapter.REMOVED_CART_ITEM.contains(item.getItem_id())) {
+                    newCartList.add(item);
+                }
+            }
             Intent intent = new Intent(this, CheckoutActivity.class);
+            intent.putExtra("CART_ITEM", (Serializable) newCartList);
             intent.putExtra("TOTAL_CART_PRICE", total_cart_price);
-            intent.putExtra("REMOVED_CART_ITEM", CartItemRecyclerAdapter.REMOVED_CART_ITEM);
             startActivity(intent);
         });
     }

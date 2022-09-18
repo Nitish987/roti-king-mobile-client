@@ -1,8 +1,9 @@
 package com.rotiking.client.models;
 
+import java.io.Serializable;
 import java.util.List;
 
-public class CartItem {
+public class CartItem implements Serializable {
     private String item_id;
     private String food_id;
     private int quantity;

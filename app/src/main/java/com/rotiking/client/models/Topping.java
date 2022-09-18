@@ -1,6 +1,8 @@
 package com.rotiking.client.models;
 
-public class Topping {
+import java.io.Serializable;
+
+public class Topping implements Serializable {
     private String topping_id;
     private String name;
     private String photo;
