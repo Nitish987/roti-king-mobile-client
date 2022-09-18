@@ -18,7 +18,6 @@ import com.rotiking.client.utils.Promise;
 import com.rotiking.client.utils.Validator;
 import com.google.android.material.progressindicator.CircularProgressIndicator;
 
-import org.json.JSONArray;
 import org.json.JSONObject;
 
 public class SignupPasswordActivity extends AppCompatActivity {
@@ -92,45 +91,34 @@ public class SignupPasswordActivity extends AppCompatActivity {
 
                 signupBtn.setVisibility(View.INVISIBLE);
 
-                Auth.Signup.signupOtpVerification(this, token, otp, new Promise() {
+                Auth.Signup.signupOtpVerification(this, token, otp, new Promise<JSONObject>() {
                     @Override
                     public void resolving(int progress, String msg) {
                         signupProgress.setVisibility(View.VISIBLE);
                     }
 
                     @Override
-                    public void resolved(Object o) {
-                        JSONObject response = (JSONObject) o;
+                    public void resolved(JSONObject data) {
                         try {
-                            if (response.getBoolean("success")) {
-                                JSONObject data = response.getJSONObject("data");
-                                String message_ = data.getString("message");
-                                String token_ = data.getString("token");
+                            String message_ = data.getString("message");
+                            String token_ = data.getString("token");
 
-                                String title = "Create Password";
-                                titleTxt.setText(title);
-                                messageTxt.setText(message_);
+                            String title = "Create Password";
+                            titleTxt.setText(title);
+                            messageTxt.setText(message_);
 
-                                token = token_;
+                            token = token_;
 
-                                otpSection.setVisibility(View.GONE);
-                                passwordSection.setVisibility(View.VISIBLE);
-                                confirmPasswordSection.setVisibility(View.VISIBLE);
-                                signupProgress.setVisibility(View.INVISIBLE);
-                                signupBtn.setVisibility(View.VISIBLE);
+                            otpSection.setVisibility(View.GONE);
+                            passwordSection.setVisibility(View.VISIBLE);
+                            confirmPasswordSection.setVisibility(View.VISIBLE);
+                            signupProgress.setVisibility(View.INVISIBLE);
+                            signupBtn.setVisibility(View.VISIBLE);
 
-                                signupBtn.setTag("password");
+                            signupBtn.setTag("password");
 
-                                String btnText = "Signup";
-                                signupBtn.setText(btnText);
-                            } else {
-                                JSONObject errors = response.getJSONObject("data").getJSONObject("errors");
-                                String key = errors.keys().next();
-                                JSONArray array = errors.getJSONArray(key);
-
-                                Toast.makeText(SignupPasswordActivity.this, array.getString(0), Toast.LENGTH_LONG).show();
-                                signupBtn.setVisibility(View.VISIBLE);
-                            }
+                            String btnText = "Signup";
+                            signupBtn.setText(btnText);
                         } catch (Exception e) {
                             e.printStackTrace();
                             Toast.makeText(SignupPasswordActivity.this, "something went wrong.", Toast.LENGTH_SHORT).show();
@@ -167,7 +155,7 @@ public class SignupPasswordActivity extends AppCompatActivity {
                     return;
                 }
 
-                if (!password.equals(confirm_password)){
+                if (!password.equals(confirm_password)) {
                     password_eTxt.setError("Password does Not Match.");
                     confirmPassword_eTxt.setError("Password does Not Match.");
                     return;
@@ -175,34 +163,23 @@ public class SignupPasswordActivity extends AppCompatActivity {
 
                 signupBtn.setVisibility(View.INVISIBLE);
 
-                Auth.Signup.signupPasswordCreation(this, token, password, new Promise() {
+                Auth.Signup.signupPasswordCreation(this, token, password, new Promise<JSONObject>() {
                     @Override
                     public void resolving(int progress, String msg) {
                         signupProgress.setVisibility(View.VISIBLE);
                     }
 
                     @Override
-                    public void resolved(Object o) {
-                        JSONObject response = (JSONObject) o;
+                    public void resolved(JSONObject data) {
                         try {
-                            if (response.getBoolean("success")) {
-                                JSONObject data = response.getJSONObject("data");
-                                String message = data.getString("message");
+                            String message = data.getString("message");
 
-                                Toast.makeText(SignupPasswordActivity.this, message, Toast.LENGTH_LONG).show();
+                            Toast.makeText(SignupPasswordActivity.this, message, Toast.LENGTH_LONG).show();
 
-                                Intent intent = new Intent(SignupPasswordActivity.this, LoginActivity.class);
-                                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                                startActivity(intent);
-                                finish();
-                            } else {
-                                JSONObject errors = response.getJSONObject("data").getJSONObject("errors");
-                                String key = errors.keys().next();
-                                JSONArray array = errors.getJSONArray(key);
-
-                                Toast.makeText(SignupPasswordActivity.this, array.getString(0), Toast.LENGTH_LONG).show();
-                                signupBtn.setVisibility(View.VISIBLE);
-                            }
+                            Intent intent = new Intent(SignupPasswordActivity.this, LoginActivity.class);
+                            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                            startActivity(intent);
+                            finish();
                         } catch (Exception e) {
                             e.printStackTrace();
                             Toast.makeText(SignupPasswordActivity.this, "something went wrong.", Toast.LENGTH_SHORT).show();

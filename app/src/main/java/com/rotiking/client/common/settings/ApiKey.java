@@ -20,7 +20,7 @@ public class ApiKey {
 
     private native static String getFirebaseAccessServerKey();
 
-    public static void loadServerApiKey(Context context, Promise promise) {
+    public static void loadServerApiKey(Context context, Promise<Object> promise) {
         promise.resolving(0, null);
 
         try {

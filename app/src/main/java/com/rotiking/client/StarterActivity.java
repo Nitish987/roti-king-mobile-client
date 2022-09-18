@@ -31,7 +31,7 @@ public class StarterActivity extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
         AES128.loadEncryptionKey();
-        ApiKey.loadServerApiKey(this, new Promise() {
+        ApiKey.loadServerApiKey(this, new Promise<Object>() {
             @Override
             public void resolving(int progress, String msg) {
                 if (progress == 100) {

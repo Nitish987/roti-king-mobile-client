@@ -12,20 +12,19 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.rotiking.client.R;
+import com.rotiking.client.models.Topping;
 import com.rotiking.client.utils.Pass;
 
-import org.json.JSONArray;
-import org.json.JSONObject;
-
 import java.util.HashSet;
+import java.util.List;
 
 public class ToppingItemRecyclerAdapter extends RecyclerView.Adapter<ToppingItemRecyclerAdapter.ToppingsItemHolder> {
-    private final JSONArray toppings;
+    private final List<Topping> toppings;
     private final Pass pass;
     public static HashSet<String> toppingIds;
     private static int TOTAL_TOPPINGS_PRICE;
 
-    public ToppingItemRecyclerAdapter(JSONArray toppings, Pass pass) {
+    public ToppingItemRecyclerAdapter(List<Topping> toppings, Pass pass) {
         this.toppings = toppings;
         this.pass = pass;
         toppingIds = new HashSet<>();
@@ -40,40 +39,36 @@ public class ToppingItemRecyclerAdapter extends RecyclerView.Adapter<ToppingItem
 
     @Override
     public void onBindViewHolder(@NonNull ToppingsItemHolder holder, int position) {
-        try {
-            JSONObject topping = toppings.getJSONObject(position);
-            holder.setName(topping.getString(("name")));
-            holder.setPhoto(topping.getString("photo"));
+        Topping topping = toppings.get(position);
+        holder.setName(topping.getName());
+        holder.setPhoto(topping.getPhoto());
 
-            int price = topping.getInt("price");
-            holder.setPrice(price);
+        int price = topping.getPrice();
+        holder.setPrice(price);
 
-            String toppingId = topping.getString("topping_id");
-            if (toppingIds.contains(toppingId)) {
-                holder.toppingLayout.setBackgroundColor(holder.itemView.getContext().getColor(R.color.green_transparent));
-            } else {
-                holder.toppingLayout.setBackgroundColor(holder.itemView.getContext().getColor(R.color.transparent));
-            }
-
-            holder.itemView.setOnClickListener(view -> {
-                if (toppingIds.contains(toppingId)) {
-                    toppingIds.remove(toppingId);
-                    TOTAL_TOPPINGS_PRICE -= price;
-                } else {
-                    toppingIds.add(toppingId);
-                    TOTAL_TOPPINGS_PRICE += price;
-                }
-                pass.on(TOTAL_TOPPINGS_PRICE);
-                notifyItemChanged(position);
-            });
-        } catch (Exception e) {
-            e.printStackTrace();
+        String toppingId = topping.getTopping_id();
+        if (toppingIds.contains(toppingId)) {
+            holder.toppingLayout.setBackgroundColor(holder.itemView.getContext().getColor(R.color.green_transparent));
+        } else {
+            holder.toppingLayout.setBackgroundColor(holder.itemView.getContext().getColor(R.color.transparent));
         }
+
+        holder.itemView.setOnClickListener(view -> {
+            if (toppingIds.contains(toppingId)) {
+                toppingIds.remove(toppingId);
+                TOTAL_TOPPINGS_PRICE -= price;
+            } else {
+                toppingIds.add(toppingId);
+                TOTAL_TOPPINGS_PRICE += price;
+            }
+            pass.on(TOTAL_TOPPINGS_PRICE);
+            notifyItemChanged(position);
+        });
     }
 
     @Override
     public int getItemCount() {
-        return toppings.length();
+        return toppings.size();
     }
 
     public static class ToppingsItemHolder extends RecyclerView.ViewHolder {
@@ -98,7 +93,7 @@ public class ToppingItemRecyclerAdapter extends RecyclerView.Adapter<ToppingItem
         }
 
         public void setPrice(int price) {
-            String price_= "\u20B9 " + price;
+            String price_ = "\u20B9 " + price;
             this.price.setText(price_);
         }
     }

@@ -17,7 +17,6 @@ import com.rotiking.client.utils.Validator;
 import com.google.android.material.progressindicator.CircularProgressIndicator;
 import com.google.firebase.auth.FirebaseAuth;
 
-import org.json.JSONArray;
 import org.json.JSONObject;
 
 public class LoginActivity extends AppCompatActivity {
@@ -76,47 +75,36 @@ public class LoginActivity extends AppCompatActivity {
 
             loginBtn.setVisibility(View.INVISIBLE);
 
-            Auth.Login.login(this, email, password, new Promise() {
+            Auth.Login.login(this, email, password, new Promise<JSONObject>() {
                 @Override
                 public void resolving(int progress, String msg) {
                     loginProgress.setVisibility(View.VISIBLE);
                 }
 
                 @Override
-                public void resolved(Object o) {
-                    JSONObject response = (JSONObject) o;
+                public void resolved(JSONObject data) {
                     try {
-                        if (response.getBoolean("success")) {
-                            JSONObject data = response.getJSONObject("data");
-                            String message = data.getString("message");
-                            String fToken = data.getString("fToken");
-                            String token = data.getString("token");
-                            String login = data.getString("login");
+                        String message = data.getString("message");
+                        String fToken = data.getString("fToken");
+                        String token = data.getString("token");
+                        String login = data.getString("login");
 
-                            FirebaseAuth.getInstance().signInWithCustomToken(fToken).addOnCompleteListener(task -> {
-                                if (task.isSuccessful()) {
-                                    AuthPreferences authPreferences = new AuthPreferences(LoginActivity.this);
-                                    authPreferences.setAuthToken(token, login);
+                        FirebaseAuth.getInstance().signInWithCustomToken(fToken).addOnCompleteListener(task -> {
+                            if (task.isSuccessful()) {
+                                AuthPreferences authPreferences = new AuthPreferences(LoginActivity.this);
+                                authPreferences.setAuthToken(token, login);
 
-                                    Toast.makeText(LoginActivity.this, message, Toast.LENGTH_SHORT).show();
+                                Toast.makeText(LoginActivity.this, message, Toast.LENGTH_SHORT).show();
 
-                                    Intent intent = new Intent(LoginActivity.this, MainActivity.class);
-                                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                                    startActivity(intent);
-                                    finish();
-                                } else {
-                                    Toast.makeText(LoginActivity.this, "Unable to Login.", Toast.LENGTH_LONG).show();
-                                    loginBtn.setVisibility(View.VISIBLE);
-                                }
-                            });
-                        } else {
-                            JSONObject errors = response.getJSONObject("data").getJSONObject("errors");
-                            String key = errors.keys().next();
-                            JSONArray array = errors.getJSONArray(key);
-
-                            Toast.makeText(LoginActivity.this, array.getString(0), Toast.LENGTH_LONG).show();
-                            loginBtn.setVisibility(View.VISIBLE);
-                        }
+                                Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+                                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                                startActivity(intent);
+                                finish();
+                            } else {
+                                Toast.makeText(LoginActivity.this, "Unable to Login.", Toast.LENGTH_LONG).show();
+                                loginBtn.setVisibility(View.VISIBLE);
+                            }
+                        });
                     } catch (Exception e) {
                         e.printStackTrace();
                         Toast.makeText(LoginActivity.this, "something went wrong.", Toast.LENGTH_SHORT).show();

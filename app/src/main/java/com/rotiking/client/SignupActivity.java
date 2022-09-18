@@ -15,7 +15,6 @@ import com.rotiking.client.common.auth.Auth;
 import com.rotiking.client.utils.Promise;
 import com.rotiking.client.utils.Validator;
 
-import org.json.JSONArray;
 import org.json.JSONObject;
 
 public class SignupActivity extends AppCompatActivity {
@@ -71,37 +70,26 @@ public class SignupActivity extends AppCompatActivity {
 
             continueBtn.setVisibility(View.INVISIBLE);
 
-            Auth.Signup.signup(this, name, email, new Promise() {
+            Auth.Signup.signup(this, name, email, new Promise<JSONObject>() {
                 @Override
                 public void resolving(int progress, String msg) {
                     continueProgress.setVisibility(View.VISIBLE);
                 }
 
                 @Override
-                public void resolved(Object o) {
-                    JSONObject response = (JSONObject) o;
+                public void resolved(JSONObject data) {
                     try {
-                        if (response.getBoolean("success")) {
-                            JSONObject data = response.getJSONObject("data");
-                            String message = data.getString("message");
-                            String token = data.getString("token");
+                        String message = data.getString("message");
+                        String token = data.getString("token");
 
-                            continueProgress.setVisibility(View.INVISIBLE);
-                            continueBtn.setVisibility(View.VISIBLE);
+                        continueProgress.setVisibility(View.INVISIBLE);
+                        continueBtn.setVisibility(View.VISIBLE);
 
-                            Intent intent = new Intent(SignupActivity.this, SignupPasswordActivity.class);
-                            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                            intent.putExtra("message", message);
-                            intent.putExtra("token", token);
-                            startActivity(intent);
-                        } else {
-                            JSONObject errors = response.getJSONObject("data").getJSONObject("errors");
-                            String key = errors.keys().next();
-                            JSONArray array = errors.getJSONArray(key);
-
-                            Toast.makeText(SignupActivity.this, array.getString(0), Toast.LENGTH_LONG).show();
-                            continueBtn.setVisibility(View.VISIBLE);
-                        }
+                        Intent intent = new Intent(SignupActivity.this, SignupPasswordActivity.class);
+                        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                        intent.putExtra("message", message);
+                        intent.putExtra("token", token);
+                        startActivity(intent);
                     } catch (Exception e) {
                         e.printStackTrace();
                         Toast.makeText(SignupActivity.this, "something went wrong.", Toast.LENGTH_SHORT).show();

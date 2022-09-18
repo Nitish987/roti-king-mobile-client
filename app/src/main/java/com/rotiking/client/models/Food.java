@@ -1,6 +1,8 @@
 package com.rotiking.client.models;
 
-public class Food {
+import java.io.Serializable;
+
+public class Food implements Serializable {
     private String food_id;
     private String name;
     private String photo;

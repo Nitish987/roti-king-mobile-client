@@ -1,7 +1,7 @@
 package com.rotiking.client.utils;
 
-public interface Promise {
+public interface Promise<T> {
     void resolving(int progress, String msg);
-    void resolved(Object o);
+    void resolved(T o);
     void reject(String err);
 }

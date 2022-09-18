@@ -4,12 +4,10 @@ import android.content.Context;
 import android.os.Build;
 
 import com.android.volley.Request;
-import com.android.volley.RequestQueue;
-import com.android.volley.toolbox.JsonObjectRequest;
-import com.android.volley.toolbox.Volley;
 import com.rotiking.client.common.settings.ApiKey;
 import com.google.firebase.auth.FirebaseAuth;
 import com.rotiking.client.utils.Promise;
+import com.rotiking.client.utils.Server;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -29,12 +27,9 @@ public class Auth {
     }
 
     public static class Signup {
-        public static void signup(Context context, String name, String email, Promise promise) {
-            promise.resolving(0, null);
-
-            String url = ApiKey.REQUEST_API_URL + "account/signup/";
-            RequestQueue queue = Volley.newRequestQueue(context);
-            promise.resolving(33, null);
+        public static void signup(Context context, String name, String email, Promise<JSONObject> promise) {
+            Map<String, String> headers = new HashMap<>();
+            headers.put("RAK", ApiKey.REQUEST_API_KEY);
 
             JSONObject body = new JSONObject();
             try {
@@ -46,32 +41,29 @@ public class Auth {
                 return;
             }
 
-            promise.resolving(75, null);
-            queue.add(new JsonObjectRequest(
-                    Request.Method.POST,
-                    url,
-                    body,
-                    response -> {
-                        promise.resolving(100, null);
-                        promise.resolved(response);
-                    },
-                    error -> promise.reject("unable to Signup!")
-            ) {
-                @Override
-                public Map<String, String> getHeaders() {
-                    Map<String, String> headers = new HashMap<>();
-                    headers.put("RAK", ApiKey.REQUEST_API_KEY);
-                    return headers;
-                }
-            });
+            Server.request(context, Request.Method.POST, ApiKey.REQUEST_API_URL + "account/signup/", headers, body, new Promise<JSONObject>() {
+                        @Override
+                        public void resolving(int progress, String msg) {
+                            promise.resolving(progress, msg);
+                        }
+
+                        @Override
+                        public void resolved(JSONObject data) {
+                            promise.resolved(data);
+                        }
+
+                        @Override
+                        public void reject(String err) {
+                            promise.reject(err);
+                        }
+                    }
+            );
         }
 
-        public static void signupOtpVerification(Context context, String token, String otp, Promise promise) {
-            promise.resolving(0, null);
-
-            String url = ApiKey.REQUEST_API_URL + "account/signup-otp/";
-            RequestQueue queue = Volley.newRequestQueue(context);
-            promise.resolving(33, null);
+        public static void signupOtpVerification(Context context, String token, String otp, Promise<JSONObject> promise) {
+            Map<String, String> headers = new HashMap<>();
+            headers.put("RAK", ApiKey.REQUEST_API_KEY);
+            headers.put("SOT", token);
 
             JSONObject body = new JSONObject();
             try {
@@ -82,33 +74,29 @@ public class Auth {
                 return;
             }
 
-            promise.resolving(75, null);
-            queue.add(new JsonObjectRequest(
-                    Request.Method.POST,
-                    url,
-                    body,
-                    response -> {
-                        promise.resolving(100, null);
-                        promise.resolved(response);
-                    },
-                    error -> promise.reject("Unable to Verify.")
-            ) {
-                @Override
-                public Map<String, String> getHeaders() {
-                    Map<String, String> headers = new HashMap<>();
-                    headers.put("RAK", ApiKey.REQUEST_API_KEY);
-                    headers.put("SOT", token);
-                    return headers;
-                }
-            });
+            Server.request(context, Request.Method.POST, ApiKey.REQUEST_API_URL + "account/signup-otp/", headers, body, new Promise<JSONObject>() {
+                        @Override
+                        public void resolving(int progress, String msg) {
+                            promise.resolving(progress, msg);
+                        }
+
+                        @Override
+                        public void resolved(JSONObject data) {
+                            promise.resolved(data);
+                        }
+
+                        @Override
+                        public void reject(String err) {
+                            promise.reject(err);
+                        }
+                    }
+            );
         }
 
-        public static void signupPasswordCreation(Context context, String token, String password, Promise promise) {
-            promise.resolving(0, null);
-
-            String url = ApiKey.REQUEST_API_URL + "account/signup-password/";
-            RequestQueue queue = Volley.newRequestQueue(context);
-            promise.resolving(33, null);
+        public static void signupPasswordCreation(Context context, String token, String password, Promise<JSONObject> promise) {
+            Map<String, String> headers = new HashMap<>();
+            headers.put("RAK", ApiKey.REQUEST_API_KEY);
+            headers.put("SPT", token);
 
             JSONObject body = new JSONObject();
             try {
@@ -120,35 +108,30 @@ public class Auth {
                 return;
             }
 
-            promise.resolving(75, null);
-            queue.add(new JsonObjectRequest(
-                    Request.Method.POST,
-                    url,
-                    body,
-                    response -> {
-                        promise.resolving(100, null);
-                        promise.resolved(response);
-                    },
-                    error -> promise.reject("Unable to signup.")
-            ) {
-                @Override
-                public Map<String, String> getHeaders() {
-                    Map<String, String> headers = new HashMap<>();
-                    headers.put("RAK", ApiKey.REQUEST_API_KEY);
-                    headers.put("SPT", token);
-                    return headers;
-                }
-            });
+            Server.request(context, Request.Method.POST, ApiKey.REQUEST_API_URL + "account/signup-password/", headers, body, new Promise<JSONObject>() {
+                        @Override
+                        public void resolving(int progress, String msg) {
+                            promise.resolving(progress, msg);
+                        }
+
+                        @Override
+                        public void resolved(JSONObject data) {
+                            promise.resolved(data);
+                        }
+
+                        @Override
+                        public void reject(String err) {
+                            promise.reject(err);
+                        }
+                    }
+            );
         }
     }
 
     public static class Login {
-        public static void login(Context context, String email, String password, Promise promise) {
-            promise.resolving(0, null);
-
-            String url = ApiKey.REQUEST_API_URL + "account/login/";
-            RequestQueue queue = Volley.newRequestQueue(context);
-            promise.resolving(33, null);
+        public static void login(Context context, String email, String password, Promise<JSONObject> promise) {
+            Map<String, String> headers = new HashMap<>();
+            headers.put("RAK", ApiKey.REQUEST_API_KEY);
 
             JSONObject body = new JSONObject();
             try {
@@ -162,55 +145,54 @@ public class Auth {
                 return;
             }
 
-            promise.resolving(75, null);
-            queue.add(new JsonObjectRequest(
-                    Request.Method.POST,
-                    url,
-                    body,
-                    response -> {
-                        promise.resolving(100, null);
-                        promise.resolved(response);
-                    },
-                    error -> promise.reject("unable to Login!")
-            ) {
-                @Override
-                public Map<String, String> getHeaders() {
-                    Map<String, String> headers = new HashMap<>();
-                    headers.put("RAK", ApiKey.REQUEST_API_KEY);
-                    return headers;
-                }
-            });
+            Server.request(context, Request.Method.POST, ApiKey.REQUEST_API_URL + "account/login/", headers, body, new Promise<JSONObject>() {
+                        @Override
+                        public void resolving(int progress, String msg) {
+                            promise.resolving(progress, msg);
+                        }
+
+                        @Override
+                        public void resolved(JSONObject data) {
+                            promise.resolved(data);
+                        }
+
+                        @Override
+                        public void reject(String err) {
+                            promise.reject(err);
+                        }
+                    }
+            );
         }
     }
 
-    public static class Account {
-        public static void profile(Context context, Promise promise) {
-            promise.resolving(0, null);
-
-            String url = ApiKey.REQUEST_API_URL + "account/profile/";
-            RequestQueue queue = Volley.newRequestQueue(context);
-            promise.resolving(33, null);
-
-            promise.resolving(75, null);
-            queue.add(new JsonObjectRequest(
-                    Request.Method.GET,
-                    url,
-                    null,
-                    response -> {
-                        promise.resolving(100, null);
-                        promise.resolved(response);
-                    },
-                    error -> promise.reject("unable to load Profile!")
-            ) {
-                @Override
-                public Map<String, String> getHeaders() {
-                    Map<String, String> headers = new HashMap<>();
-                    headers.put("RAK", ApiKey.REQUEST_API_KEY);
-                    headers.put("AT", AUTH_TOKEN);
-                    headers.put("LT", LOGIN_TOKEN);
-                    return headers;
-                }
-            });
-        }
-    }
+//    public static class Account {
+//        public static void profile(Context context, Promise<JSONObject> promise) {
+//            promise.resolving(0, null);
+//
+//            String url = ApiKey.REQUEST_API_URL + "account/profile/";
+//            RequestQueue queue = Volley.newRequestQueue(context);
+//            promise.resolving(33, null);
+//
+//            promise.resolving(75, null);
+//            queue.add(new JsonObjectRequest(
+//                    Request.Method.GET,
+//                    url,
+//                    null,
+//                    response -> {
+//                        promise.resolving(100, null);
+//                        promise.resolved(response);
+//                    },
+//                    error -> promise.reject("unable to load Profile!")
+//            ) {
+//                @Override
+//                public Map<String, String> getHeaders() {
+//                    Map<String, String> headers = new HashMap<>();
+//                    headers.put("RAK", ApiKey.REQUEST_API_KEY);
+//                    headers.put("AT", AUTH_TOKEN);
+//                    headers.put("LT", LOGIN_TOKEN);
+//                    return headers;
+//                }
+//            });
+//        }
+//    }
 }

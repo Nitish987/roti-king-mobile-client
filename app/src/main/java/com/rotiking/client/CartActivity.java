@@ -11,12 +11,17 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.gson.Gson;
 import com.rotiking.client.adapters.CartItemRecyclerAdapter;
 import com.rotiking.client.common.db.Database;
+import com.rotiking.client.models.CartItem;
 import com.rotiking.client.utils.Promise;
 
-import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.util.Arrays;
+import java.util.List;
 
 public class CartActivity extends AppCompatActivity {
     private RecyclerView cartItemRV;
@@ -45,41 +50,30 @@ public class CartActivity extends AppCompatActivity {
         super.onStart();
         closeBtn.setOnClickListener(view -> finish());
 
-        Database.getCartItems(this, new Promise() {
+        Database.getCartItems(this, new Promise<JSONObject>() {
             @Override
             public void resolving(int progress, String msg) {
 
             }
 
             @Override
-            public void resolved(Object o) {
-                JSONObject response = (JSONObject) o;
+            public void resolved(JSONObject data) {
                 try {
-                    if (response.getBoolean("success")) {
-                        JSONObject data = response.getJSONObject("data");
-                        JSONArray cartItems = data.getJSONArray("cart");
+                    Gson gson = new Gson();
+                    List<CartItem> cartItems = Arrays.asList(gson.fromJson(data.getJSONArray("cart").toString(), CartItem[].class));
+                    total_cart_price = data.getInt("total_cart_price");
 
-                        total_cart_price = data.getInt("total_cart_price");
+                    String pri_ = "\u20B9 " + total_cart_price;
+                    totalCartPriceTxt.setText(pri_);
 
-                        String pri_ = "\u20B9 " + total_cart_price;
-                        totalCartPriceTxt.setText(pri_);
-
-                        CartItemRecyclerAdapter adapter = new CartItemRecyclerAdapter(cartItems, total_cart_price, o1 -> {
-                            total_cart_price = (int) o1[0];
-                            String newPrice = "\u20B9 " + total_cart_price;
-                            totalCartPriceTxt.setText(newPrice);
-                        });
-                        cartItemRV.setAdapter(adapter);
-                    } else {
-                        JSONObject errors = response.getJSONObject("data").getJSONObject("errors");
-                        String key = errors.keys().next();
-                        JSONArray array = errors.getJSONArray(key);
-
-                        Toast.makeText(CartActivity.this, array.getString(0), Toast.LENGTH_LONG).show();
-                    }
-                } catch (Exception e) {
+                    CartItemRecyclerAdapter adapter = new CartItemRecyclerAdapter(cartItems, total_cart_price, o1 -> {
+                        total_cart_price = (int) o1[0];
+                        String newPrice = "\u20B9 " + total_cart_price;
+                        totalCartPriceTxt.setText(newPrice);
+                    });
+                    cartItemRV.setAdapter(adapter);
+                } catch (JSONException e) {
                     e.printStackTrace();
-                    Toast.makeText(CartActivity.this, "something went wrong.", Toast.LENGTH_SHORT).show();
                 }
             }
 

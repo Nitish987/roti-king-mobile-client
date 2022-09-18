@@ -9,6 +9,7 @@ import androidx.appcompat.widget.AppCompatImageButton;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -22,11 +23,9 @@ import com.rotiking.client.CartActivity;
 import com.rotiking.client.R;
 import com.rotiking.client.adapters.ToppingItemRecyclerAdapter;
 import com.rotiking.client.common.db.Database;
+import com.rotiking.client.models.Food;
+import com.rotiking.client.models.Topping;
 import com.rotiking.client.utils.Promise;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,17 +38,17 @@ public class FoodDetailBottomSheet extends BottomSheetDialogFragment {
     private AppCompatButton addToCartBtn, openCartBtn;
     private RecyclerView toppingsRV;
 
-    private JSONObject food;
-    public static JSONArray TOPPINGS;
+    private Food food;
+    public static List<Topping> TOPPINGS;
     private int one_piece_price = 0;
     private int one_piece_price_before_discount = 0;
     private int topping_price = 0;
     private int quantity = 1;
 
-    public static FoodDetailBottomSheet newInstance(String food) {
+    public static FoodDetailBottomSheet newInstance(Food food) {
         FoodDetailBottomSheet fragment = new FoodDetailBottomSheet();
         Bundle args = new Bundle();
-        args.putString("FOOD", food);
+        args.putSerializable("FOOD", food);
         fragment.setArguments(args);
         return fragment;
     }
@@ -58,16 +57,12 @@ public class FoodDetailBottomSheet extends BottomSheetDialogFragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
-            try {
-                food = new JSONObject(getArguments().getString("FOOD"));
+            food = (Food) getArguments().getSerializable("FOOD");
 
-                one_piece_price_before_discount = food.getInt("price");
-                one_piece_price = food.getInt("price");
-                if (food.getInt("discount") != 0) {
-                    one_piece_price = one_piece_price - Math.round((float) (food.getInt("discount") * one_piece_price) / 100);
-                }
-            } catch (JSONException e) {
-                e.printStackTrace();
+            one_piece_price_before_discount = food.getPrice();
+            one_piece_price = food.getPrice();
+            if (food.getDiscount() != 0) {
+                one_piece_price = one_piece_price - Math.round((float) (food.getDiscount() * one_piece_price) / 100);
             }
         }
     }
@@ -106,47 +101,43 @@ public class FoodDetailBottomSheet extends BottomSheetDialogFragment {
     @Override
     public void onStart() {
         super.onStart();
-        try {
-            if (!food.getString("photo").equals("")) {
-                Glide.with(view.getContext()).load(food.getString("photo")).into(photo);
-            }
-            name.setText(food.getString("name"));
-            foodType.setText(food.getString("food_type"));
-            available.setText(food.getBoolean("available") ? "Available" : "Not Available right now. Come back Later");
-
-            String rate_ = Double.toString(food.getDouble("rating"));
-            rating.setText(rate_);
-
-            String desc_ = "Description - \n" + food.getString("description");
-            description.setText(desc_);
-
-            String ing_ = "Ingredients - " + food.getString("ingredients");
-            ingredients.setText(ing_);
-
-            String inc_ = "Includes - " + food.getString("food_includes");
-            includes.setText(inc_);
-
-            if (food.getDouble("discount") == 0) {
-                discount.setVisibility(View.INVISIBLE);
-                crossPrice.setVisibility(View.GONE);
-            } else {
-                String dis_ = "-" + food.getDouble("discount") + "% OFF";
-                discount.setText(dis_);
-
-                setCrossPrice();
-            }
-
-            setPrice();
-            setPayablePrice();
-
-            ToppingItemRecyclerAdapter adapter = new ToppingItemRecyclerAdapter(TOPPINGS, o -> {
-                topping_price = (Integer) o[0];
-                setPayablePrice();
-            });
-            toppingsRV.setAdapter(adapter);
-        } catch (JSONException e) {
-            e.printStackTrace();
+        if (!food.getPhoto().equals("")) {
+            Glide.with(view.getContext()).load(food.getPhoto()).into(photo);
         }
+        name.setText(food.getName());
+        foodType.setText(food.getFood_type());
+        available.setText(food.isAvailable() ? "Available" : "Not Available right now. Come back Later");
+
+        String rate_ = Double.toString(food.getRating());
+        rating.setText(rate_);
+
+        String desc_ = "Description - \n" + food.getDescription();
+        description.setText(desc_);
+
+        String ing_ = "Ingredients - " + food.getIngredients();
+        ingredients.setText(ing_);
+
+        String inc_ = "Includes - " + food.getFood_includes();
+        includes.setText(inc_);
+
+        if (food.getDiscount() == 0) {
+            discount.setVisibility(View.INVISIBLE);
+            crossPrice.setVisibility(View.GONE);
+        } else {
+            String dis_ = "-" + food.getDiscount() + "% OFF";
+            discount.setText(dis_);
+
+            setCrossPrice();
+        }
+
+        setPrice();
+        setPayablePrice();
+
+        ToppingItemRecyclerAdapter adapter = new ToppingItemRecyclerAdapter(TOPPINGS, o -> {
+            topping_price = (Integer) o[0];
+            setPayablePrice();
+        });
+        toppingsRV.setAdapter(adapter);
 
         incQuantityBtn.setOnClickListener(view1 -> {
             quantity += 1;
@@ -166,40 +157,23 @@ public class FoodDetailBottomSheet extends BottomSheetDialogFragment {
         });
 
         addToCartBtn.setOnClickListener(view1 -> {
-            try {
-                List<String> toppingIds = new ArrayList<>(ToppingItemRecyclerAdapter.toppingIds);
-                Database.addToCart(view1.getContext(), food.getString("food_id"), quantity, toppingIds, new Promise() {
-                    @Override
-                    public void resolving(int progress, String msg) {}
+            List<String> toppingIds = new ArrayList<>(ToppingItemRecyclerAdapter.toppingIds);
+            Log.e("TAG", "onStart: " + toppingIds + " " + food.getFood_id() + " " + quantity);
+            Database.addToCart(view1.getContext(), food.getFood_id(), quantity, toppingIds, new Promise<String>() {
+                @Override
+                public void resolving(int progress, String msg) {
+                }
 
-                    @Override
-                    public void resolved(Object o) {
-                        JSONObject response = (JSONObject) o;
-                        try {
-                            if (response.getBoolean("success")) {
-                                String message = response.getJSONObject("data").getString("message");
-                                Toast.makeText(view.getContext(), message, Toast.LENGTH_SHORT).show();
-                            } else {
-                                JSONObject errors = response.getJSONObject("data").getJSONObject("errors");
-                                String key = errors.keys().next();
-                                JSONArray array = errors.getJSONArray(key);
+                @Override
+                public void resolved(String message) {
+                    Toast.makeText(view.getContext(), message, Toast.LENGTH_SHORT).show();
+                }
 
-                                Toast.makeText(view.getContext(), array.getString(0), Toast.LENGTH_LONG).show();
-                            }
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                            Toast.makeText(view.getContext(), "something went wrong.", Toast.LENGTH_SHORT).show();
-                        }
-                    }
-
-                    @Override
-                    public void reject(String err) {
-                        Toast.makeText(view.getContext(), "something went wrong.", Toast.LENGTH_SHORT).show();
-                    }
-                });
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
+                @Override
+                public void reject(String err) {
+                    Toast.makeText(view.getContext(), err, Toast.LENGTH_SHORT).show();
+                }
+            });
         });
 
         openCartBtn.setOnClickListener(view1 -> {

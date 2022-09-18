@@ -13,21 +13,21 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.rotiking.client.R;
+import com.rotiking.client.models.CartItem;
+import com.rotiking.client.models.Food;
+import com.rotiking.client.models.Topping;
 import com.rotiking.client.utils.Pass;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.util.HashSet;
+import java.util.List;
 
 public class CartItemRecyclerAdapter extends RecyclerView.Adapter<CartItemRecyclerAdapter.CartItemHolder> {
-    private final JSONArray cartItems;
+    private final List<CartItem> cartItems;
     private int totalCartPrice;
     private final Pass pass;
     public static HashSet<String> REMOVED_CART_ITEM;
 
-    public CartItemRecyclerAdapter(JSONArray cartItems, int totalCartPrice, Pass pass) {
+    public CartItemRecyclerAdapter(List<CartItem> cartItems, int totalCartPrice, Pass pass) {
         this.cartItems = cartItems;
         this.totalCartPrice = totalCartPrice;
         this.pass = pass;
@@ -42,51 +42,47 @@ public class CartItemRecyclerAdapter extends RecyclerView.Adapter<CartItemRecycl
 
     @Override
     public void onBindViewHolder(@NonNull CartItemHolder holder, int position) {
-        try {
-            JSONObject item = cartItems.getJSONObject(position);
-            String itemId = item.getString("item_id");
+        CartItem item = cartItems.get(position);
+        String itemId = item.getItem_id();
 
-            JSONObject food = item.getJSONObject("food_data");
-            holder.setPhoto(food.getString("photo"));
-            holder.setName(food.getString("name"));
-            holder.setType(food.getString("food_type"));
-            holder.setDiscount(food.getInt(("discount")));
-            holder.setRating(food.getDouble("rating"));
-            holder.setQuantity(item.getInt("quantity"));
-            holder.setToppings(item.getString("topping_ids"), item.getJSONArray("toppings"));
+        Food food = item.getFood_data();
+        holder.setPhoto(food.getPhoto());
+        holder.setName(food.getName());
+        holder.setType(food.getFood_type());
+        holder.setDiscount(food.getDiscount());
+        holder.setRating(food.getRating());
+        holder.setQuantity(item.getQuantity());
+        holder.setToppings(item.getTopping_ids(), item.getToppings());
 
-            int price = item.getInt("total_price");
-            holder.setPrice(price);
+        int price = item.getTotal_price();
+        holder.setPrice(price);
 
-            if (REMOVED_CART_ITEM.contains(itemId)) {
-                holder.cartItemLayout.setBackgroundColor(holder.itemView.getContext().getColor(R.color.red_transparent));
-                holder.removeCartItemBtn.setImageResource(R.drawable.ic_baseline_check_24);
-            } else {
-                holder.cartItemLayout.setBackgroundColor(holder.itemView.getContext().getColor(R.color.transparent));
-                holder.removeCartItemBtn.setImageResource(R.drawable.ic_baseline_close_24);
-            }
-
-            holder.removeCartItemBtn.setOnClickListener(view -> {
-                if (REMOVED_CART_ITEM.contains(itemId)) {
-                    holder.removeCartItemBtn.setImageResource(R.drawable.ic_baseline_check_24);
-                    REMOVED_CART_ITEM.remove(itemId);
-                    totalCartPrice += price;
-                } else {
-                    holder.removeCartItemBtn.setImageResource(R.drawable.ic_baseline_close_24);
-                    REMOVED_CART_ITEM.add(itemId);
-                    totalCartPrice -= price;
-                }
-                pass.on(totalCartPrice);
-                notifyItemChanged(position);
-            });
-        } catch (JSONException e) {
-            e.printStackTrace();
+        if (REMOVED_CART_ITEM.contains(itemId)) {
+            holder.cartItemLayout.setBackgroundColor(holder.itemView.getContext().getColor(R.color.red_transparent));
+            holder.removeCartItemBtn.setImageResource(R.drawable.ic_baseline_check_24);
+        } else {
+            holder.cartItemLayout.setBackgroundColor(holder.itemView.getContext().getColor(R.color.transparent));
+            holder.removeCartItemBtn.setImageResource(R.drawable.ic_baseline_close_24);
         }
+
+        holder.removeCartItemBtn.setOnClickListener(view -> {
+            if (REMOVED_CART_ITEM.contains(itemId)) {
+                holder.removeCartItemBtn.setImageResource(R.drawable.ic_baseline_check_24);
+                REMOVED_CART_ITEM.remove(itemId);
+                totalCartPrice += price;
+            } else {
+                holder.removeCartItemBtn.setImageResource(R.drawable.ic_baseline_close_24);
+                REMOVED_CART_ITEM.add(itemId);
+                totalCartPrice -= price;
+            }
+            pass.on(totalCartPrice);
+            notifyItemChanged(position);
+        });
     }
 
     @Override
     public int getItemCount() {
-        return cartItems.length();
+        return cartItems.size();
     }
 
     public static class CartItemHolder extends RecyclerView.ViewHolder {
@@ -126,7 +122,7 @@ public class CartItemRecyclerAdapter extends RecyclerView.Adapter<CartItemRecycl
                 this.discount.setVisibility(View.INVISIBLE);
             } else {
                 this.discount.setVisibility(View.VISIBLE);
-                String discount_ = discount + "% OFF" ;
+                String discount_ = discount + "% OFF";
                 this.discount.setText(discount_);
             }
         }
@@ -137,31 +133,25 @@ public class CartItemRecyclerAdapter extends RecyclerView.Adapter<CartItemRecycl
         }
 
         public void setQuantity(int quantity) {
-            String qua_ = "Quantity : "+ quantity;
+            String qua_ = "Quantity : " + quantity;
             this.quantity.setText(qua_);
         }
 
-        public void setToppings(String toppings_ids, JSONArray toppings) {
+        public void setToppings(String toppings_ids, List<Topping> toppings) {
             if (toppings_ids.equals("None")) {
                 this.toppings.setVisibility(View.GONE);
             } else {
                 this.toppings.setVisibility(View.VISIBLE);
-                String qua_ = "Toppings Added : ";
-                this.toppings.setText(qua_);
-            }
 
-            StringBuilder top_ = new StringBuilder();
-            top_.append("Toppings Added ").append("(").append(toppings.length()).append(") : ");
-            for (int i = 0; i < toppings.length(); i++) {
-                try {
-                    JSONObject topping = toppings.getJSONObject(i);
-                    top_.append(" ").append(topping.getString("name")).append(",");
-                } catch (JSONException e) {
-                    e.printStackTrace();
+                StringBuilder top_ = new StringBuilder();
+                top_.append("Toppings Added ").append("(").append(toppings.size()).append(") : ");
+                for (int i = 0; i < toppings.size(); i++) {
+                    Topping topping = toppings.get(i);
+                    top_.append(" ").append(topping.getName()).append(",");
                 }
+                top_.replace(top_.length() - 1, top_.length(), "");
+                this.toppings.setText(top_);
             }
-            top_.replace(top_.length() - 1, top_.length(), "");
-            this.toppings.setText(top_);
         }
 
         private void setPrice(int totalPrice) {
