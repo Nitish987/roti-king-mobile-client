@@ -1,8 +1,10 @@
 package com.rotiking.client.tabs;
 
 import android.annotation.SuppressLint;
+import android.content.Intent;
 import android.os.Bundle;
 
+import androidx.appcompat.widget.AppCompatImageButton;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -10,11 +12,13 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 import android.widget.Toast;
 
 import com.google.android.material.chip.ChipGroup;
 import com.google.android.material.progressindicator.CircularProgressIndicator;
 import com.rotiking.client.R;
+import com.rotiking.client.SearchResultActivity;
 import com.rotiking.client.adapters.FoodCardRecyclerAdapter;
 import com.rotiking.client.adapters.FoodItemRecyclerAdapter;
 import com.rotiking.client.common.db.Database;
@@ -22,6 +26,7 @@ import com.rotiking.client.models.Food;
 import com.rotiking.client.models.Topping;
 import com.rotiking.client.sheets.FoodDetailBottomSheet;
 import com.rotiking.client.utils.Promise;
+import com.rotiking.client.utils.Validator;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,6 +37,8 @@ public class HomeFragment extends Fragment {
     private RecyclerView foodsCardRV, foodsRV;
     private CircularProgressIndicator foodCardProgress;
     private ChipGroup foodFilters;
+    private EditText search_eTxt;
+    private AppCompatImageButton searchBtn;
 
     private List<Food> foods;
 
@@ -54,6 +61,8 @@ public class HomeFragment extends Fragment {
 
         foodCardProgress = view.findViewById(R.id.food_card_progress);
         foodFilters = view.findViewById(R.id.food_filter);
+        search_eTxt = view.findViewById(R.id.search);
+        searchBtn = view.findViewById(R.id.search_btn);
 
         return view;
     }
@@ -127,6 +136,19 @@ public class HomeFragment extends Fragment {
                 Toast.makeText(view.getContext(), err, Toast.LENGTH_SHORT).show();
             }
         });
+
+        searchBtn.setOnClickListener(view1 -> {
+            String query = search_eTxt.getText().toString();
+
+            if (Validator.isEmpty(query)) {
+                Toast.makeText(view.getContext(), "Search should not be empty.", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            Intent intent = new Intent(view.getContext(), SearchResultActivity.class);
+            intent.putExtra("SEARCH_QUERY", query);
+            startActivity(intent);
+        });
     }
 
     private List<Food> performFoodCardQuery(String filter) {
@@ -147,5 +169,4 @@ public class HomeFragment extends Fragment {
         }
         return query;
     }
-
 }
