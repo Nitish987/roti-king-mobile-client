@@ -63,6 +63,10 @@
     <string name="order_name">Order Name</string>
     <string name="all_the_price_are_calculated_with_or_without_discount_depends_on_the_discount_given_on_the_item">All the price are calculated with or without discount depends on the discount given on the item.</string>
     <string name="search">Search</string>
+    <string name="your_address">Your Delivery Address</string>
+    <string name="enter_your_address">Enter Your Address</string>
+    <string name="save">Save</string>
+    <string name="change_address">Change Address</string>
     <string-array name="payment_method">
         <item>Cash</item>
     </string-array>

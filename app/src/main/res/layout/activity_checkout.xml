@@ -164,6 +164,27 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="20sp"
+            android:text="@string/your_address" />
+
+        <TextView
+            android:id="@+id/address"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/your_address" />
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/change_address_btn"
+            style="@style/TextButton"
+            android:layout_width="match_parent"
+            android:layout_height="30dp"
+            android:textSize="12sp"
+            android:layout_marginTop="10sp"
+            android:text="@string/change_address" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10sp"
             android:text="@string/payment_method" />
 
         <androidx.appcompat.widget.AppCompatSpinner
