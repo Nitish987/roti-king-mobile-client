@@ -28,6 +28,7 @@ import com.rotiking.client.sheets.FoodDetailBottomSheet;
 import com.rotiking.client.utils.Promise;
 import com.rotiking.client.utils.Validator;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -147,6 +148,7 @@ public class HomeFragment extends Fragment {
 
             Intent intent = new Intent(view.getContext(), SearchResultActivity.class);
             intent.putExtra("SEARCH_QUERY", query);
+            intent.putExtra("FOOD_DATA", (Serializable) foods);
             startActivity(intent);
         });
     }

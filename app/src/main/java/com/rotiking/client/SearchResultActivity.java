@@ -12,20 +12,19 @@ import android.widget.Toast;
 
 import com.google.android.material.chip.ChipGroup;
 import com.google.android.material.progressindicator.CircularProgressIndicator;
-import com.rotiking.client.adapters.FoodCardRecyclerAdapter;
 import com.rotiking.client.adapters.FoodItemRecyclerAdapter;
-import com.rotiking.client.common.db.Database;
 import com.rotiking.client.models.Food;
 import com.rotiking.client.utils.Promise;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 public class SearchResultActivity extends AppCompatActivity {
     private RecyclerView foodsRV;
-    private CircularProgressIndicator foodSearchProgress;
     private ChipGroup foodFilters;
     private ImageButton closeBtn;
+    private CircularProgressIndicator foodSearchProgress;
 
     private String query;
     private List<Food> foods;
@@ -39,29 +38,29 @@ public class SearchResultActivity extends AppCompatActivity {
         foodsRV.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
         foodsRV.setHasFixedSize(true);
 
-        foodSearchProgress = findViewById(R.id.food_item_progress);
         foodFilters = findViewById(R.id.food_filter);
         closeBtn = findViewById(R.id.close);
+        foodSearchProgress = findViewById(R.id.food_item_progress);
 
         query = getIntent().getStringExtra("SEARCH_QUERY");
+        foods = (List<Food>) getIntent().getSerializableExtra("FOOD_DATA");
     }
 
     @SuppressLint("NonConstantResourceId")
     @Override
     protected void onStart() {
         super.onStart();
-        Database.searchFoodItem(this, query, new Promise<List<Food>>() {
+        performSearchQuery(query, new Promise<List<Food>>() {
             @Override
             public void resolving(int progress, String msg) {
-                foodSearchProgress.setVisibility(View.VISIBLE);
                 foodFilters.setEnabled(false);
+                foodSearchProgress.setVisibility(View.VISIBLE);
             }
 
             @Override
-            public void resolved(List<Food> foods_) {
-                foods = foods_;
-                foodSearchProgress.setVisibility(View.GONE);
+            public void resolved(List<Food> foods) {
                 foodFilters.setEnabled(true);
+                foodSearchProgress.setVisibility(View.INVISIBLE);
 
                 FoodItemRecyclerAdapter itemAdapter = new FoodItemRecyclerAdapter(foods, getSupportFragmentManager());
                 foodsRV.setAdapter(itemAdapter);
@@ -69,6 +68,7 @@ public class SearchResultActivity extends AppCompatActivity {
 
             @Override
             public void reject(String err) {
+                foodFilters.setEnabled(false);
                 Toast.makeText(SearchResultActivity.this, err, Toast.LENGTH_SHORT).show();
             }
         });
@@ -76,22 +76,22 @@ public class SearchResultActivity extends AppCompatActivity {
         foodFilters.setOnCheckedStateChangeListener((group, checkedIds) -> {
             switch (group.getCheckedChipId()) {
                 case R.id.breakfast:
-                    List<Food> breakfast = performFoodCardQuery("breakfast");
-                    foodsRV.swapAdapter(new FoodCardRecyclerAdapter(breakfast, getSupportFragmentManager()), true);
+                    List<Food> breakfast = performFoodQueryFilter("breakfast");
+                    foodsRV.swapAdapter(new FoodItemRecyclerAdapter(breakfast, getSupportFragmentManager()), true);
                     break;
 
                 case R.id.lunch:
-                    List<Food> lunch = performFoodCardQuery("lunch");
-                    foodsRV.swapAdapter(new FoodCardRecyclerAdapter(lunch, getSupportFragmentManager()), true);
+                    List<Food> lunch = performFoodQueryFilter("lunch");
+                    foodsRV.swapAdapter(new FoodItemRecyclerAdapter(lunch, getSupportFragmentManager()), true);
                     break;
 
                 case R.id.dinner:
-                    List<Food> dinner = performFoodCardQuery("dinner");
-                    foodsRV.swapAdapter(new FoodCardRecyclerAdapter(dinner, getSupportFragmentManager()), true);
+                    List<Food> dinner = performFoodQueryFilter("dinner");
+                    foodsRV.swapAdapter(new FoodItemRecyclerAdapter(dinner, getSupportFragmentManager()), true);
                     break;
 
                 default:
-                    foodsRV.swapAdapter(new FoodCardRecyclerAdapter(foods, getSupportFragmentManager()), true);
+                    foodsRV.swapAdapter(new FoodItemRecyclerAdapter(foods, getSupportFragmentManager()), true);
                     break;
             }
         });
@@ -99,7 +99,27 @@ public class SearchResultActivity extends AppCompatActivity {
         closeBtn.setOnClickListener(view -> finish());
     }
 
-    private List<Food> performFoodCardQuery(String filter) {
+    private List<Food> performFoodQueryFilter(String filter) {
         return foods.stream().filter(f -> f.getFood_type().equals(filter)).collect(Collectors.toList());
+    }
+
+    private void performSearchQuery(String query, Promise<List<Food>> promise) {
+        try {
+            promise.resolving(0, null);
+            String[] search = query.split(" ");
+            List<Food> foodQuery = new ArrayList<>();
+            for (String s : search) {
+                promise.resolving(50, null);
+                foods.stream().filter(f -> f.getName().startsWith(s) || f.getName().endsWith(s) || f.getFood_type().startsWith(s) || f.getFood_type().endsWith(s)).forEach(f -> {
+                    if (!foodQuery.contains(f)) {
+                        foodQuery.add(f);
+                    }
+                });
+            }
+            this.foods = foodQuery;
+            promise.resolved(foodQuery);
+        } catch (Exception e) {
+            promise.reject("Something went wrong.");
+        }
     }
 }

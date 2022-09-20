@@ -148,44 +148,4 @@ public class Database {
                 }
         );
     }
-
-    public static void searchFoodItem(Context context, String search, Promise<List<Food>> promise) {
-        Map<String, String> headers = new HashMap<>();
-        headers.put("RAK", ApiKey.REQUEST_API_KEY);
-        headers.put("AT", Auth.AUTH_TOKEN);
-        headers.put("LT", Auth.LOGIN_TOKEN);
-
-        JSONObject query = new JSONObject();
-        try {
-            query.put("search", search);
-        } catch (JSONException e) {
-            e.printStackTrace();
-            return;
-        }
-
-        Server.request(context, Request.Method.GET, ApiKey.REQUEST_API_URL + "client/search-food/", headers, query, new Promise<JSONObject>() {
-                    @Override
-                    public void resolving(int progress, String msg) {
-                        promise.resolving(progress, msg);
-                    }
-
-                    @Override
-                    public void resolved(JSONObject data) {
-                        Gson gson = new Gson();
-                        try {
-                            Food[] foods = gson.fromJson(data.getJSONArray("foods").toString(), Food[].class);
-                            promise.resolved(Arrays.asList(foods));
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                            promise.reject("Something went wrong.");
-                        }
-                    }
-
-                    @Override
-                    public void reject(String err) {
-                        promise.reject(err);
-                    }
-                }
-        );
-    }
 }
