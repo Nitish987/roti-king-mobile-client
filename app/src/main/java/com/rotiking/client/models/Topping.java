@@ -11,6 +11,8 @@ public class Topping implements Serializable {
     private int price;
     private double rating;
 
+    public Topping() {}
+
     public Topping(String topping_id, String name, String photo, String food_includes, boolean available, int price, double rating) {
         this.topping_id = topping_id;
         this.name = name;

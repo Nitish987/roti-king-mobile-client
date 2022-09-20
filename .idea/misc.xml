@@ -25,6 +25,7 @@
         <entry key="..\:/company_projects/RotiKing/software/mobile/client/app/src/main/res/layout/activity_checkout.xml" value="0.1875" />
         <entry key="..\:/company_projects/RotiKing/software/mobile/client/app/src/main/res/layout/activity_login.xml" value="0.2" />
         <entry key="..\:/company_projects/RotiKing/software/mobile/client/app/src/main/res/layout/activity_main.xml" value="0.18532818532818532" />
+        <entry key="..\:/company_projects/RotiKing/software/mobile/client/app/src/main/res/layout/activity_order_detail.xml" value="0.1875" />
         <entry key="..\:/company_projects/RotiKing/software/mobile/client/app/src/main/res/layout/activity_search_result.xml" value="0.1875" />
         <entry key="..\:/company_projects/RotiKing/software/mobile/client/app/src/main/res/layout/activity_signup.xml" value="0.2359375" />
         <entry key="..\:/company_projects/RotiKing/software/mobile/client/app/src/main/res/layout/activity_signup_password.xml" value="0.2359375" />
@@ -41,6 +42,7 @@
         <entry key="..\:/company_projects/RotiKing/software/mobile/client/app/src/main/res/layout/item_food.xml" value="0.18532818532818532" />
         <entry key="..\:/company_projects/RotiKing/software/mobile/client/app/src/main/res/layout/item_food_card.xml" value="0.18532818532818532" />
         <entry key="..\:/company_projects/RotiKing/software/mobile/client/app/src/main/res/layout/item_food_item.xml" value="0.1875" />
+        <entry key="..\:/company_projects/RotiKing/software/mobile/client/app/src/main/res/layout/item_order.xml" value="0.1875" />
         <entry key="..\:/company_projects/RotiKing/software/mobile/client/app/src/main/res/layout/item_topping.xml" value="0.4" />
         <entry key="..\:/company_projects/RotiKing/software/mobile/client/app/src/main/res/menu/main_bottom_navigation.xml" value="0.24895833333333334" />
         <entry key="..\:/company_projects/RotiKing/software/mobile/client/app/src/main/res/xml/network_security_config.xml" value="0.25" />

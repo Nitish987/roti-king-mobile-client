@@ -75,6 +75,14 @@
     <string name="no_name">No Name</string>
     <string name="change_details">Change Details</string>
     <string name="don_t_add_91_in_front_of_the_number">Don\'t add +91 in front of the number.</string>
+    <string name="order_0000000">#~order~0000000</string>
+    <string name="_0_items">0 Items</string>
+    <string name="preparing">Preparing...</string>
+    <string name="time">Time</string>
+    <string name="order">Order</string>
+    <string name="unpaid">unpaid</string>
+    <string name="cash">Cash</string>
+    <string name="tracking">Tracking</string>
     <string-array name="payment_method">
         <item>Cash</item>
     </string-array>

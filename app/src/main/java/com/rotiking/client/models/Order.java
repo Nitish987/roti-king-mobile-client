@@ -12,6 +12,7 @@ public class Order {
     private GeoPoint location;
     private String name;
     private String orderId;
+    private int orderNumber;
     private int orderState;
     private boolean orderSuccess;
     private int payablePrice;
@@ -23,7 +24,7 @@ public class Order {
 
     public Order() {}
 
-    public Order(String address, List<CartItem> items, int deliveryPrice, int discount, GeoPoint location, String name, String orderId, int orderState, boolean orderSuccess, int payablePrice, String paymentMethod, String phone, long time, int totalPrice, String uid) {
+    public Order(String address, List<CartItem> items, int deliveryPrice, int discount, GeoPoint location, String name, String orderId, int orderNumber, int orderState, boolean orderSuccess, int payablePrice, String paymentMethod, String phone, long time, int totalPrice, String uid) {
         this.address = address;
         this.items = items;
         this.deliveryPrice = deliveryPrice;
@@ -31,6 +32,7 @@ public class Order {
         this.location = location;
         this.name = name;
         this.orderId = orderId;
+        this.orderNumber = orderNumber;
         this.orderState = orderState;
         this.orderSuccess = orderSuccess;
         this.payablePrice = payablePrice;
@@ -159,5 +161,13 @@ public class Order {
 
     public void setItems(List<CartItem> items) {
         this.items = items;
+    }
+
+    public int getOrderNumber() {
+        return orderNumber;
+    }
+
+    public void setOrderNumber(int orderNumber) {
+        this.orderNumber = orderNumber;
     }
 }

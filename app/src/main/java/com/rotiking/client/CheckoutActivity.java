@@ -140,6 +140,7 @@ public class CheckoutActivity extends AppCompatActivity implements LocationListe
                         point,
                         name,
                         orderId,
+                        (int) (Math.random() * 10000000),
                         0,
                         true,
                         total_cart_price + delivery_price,

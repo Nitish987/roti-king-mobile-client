@@ -14,6 +14,8 @@ public class CartItem implements Serializable {
     private Food food_data;
     private List<Topping> toppings;
 
+    public CartItem() {}
+
     public CartItem(String item_id, String food_id, int quantity, int food_price, String topping_ids, int topping_price, int total_price, Food food_data, List<Topping> toppings) {
         this.item_id = item_id;
         this.food_id = food_id;
