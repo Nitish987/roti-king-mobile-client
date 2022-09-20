@@ -26,6 +26,13 @@ public class Auth {
         return AUTH_TOKEN != null && LOGIN_TOKEN != null && FirebaseAuth.getInstance().getCurrentUser() != null;
     }
 
+    public static String getAuthUserUid() {
+        if (FirebaseAuth.getInstance().getCurrentUser() != null) {
+            return FirebaseAuth.getInstance().getCurrentUser().getUid();
+        }
+        return null;
+    }
+
     public static class Signup {
         public static void signup(Context context, String name, String email, Promise<JSONObject> promise) {
             Map<String, String> headers = new HashMap<>();
