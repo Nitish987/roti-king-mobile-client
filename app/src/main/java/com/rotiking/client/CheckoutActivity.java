@@ -19,12 +19,14 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.GeoPoint;
 import com.rotiking.client.adapters.CheckoutCartItemRecyclerAdapter;
 import com.rotiking.client.common.auth.Auth;
 import com.rotiking.client.models.CartItem;
 import com.rotiking.client.models.CheckoutCartItem;
+import com.rotiking.client.models.Order;
 import com.rotiking.client.sheets.AddressBottomSheet;
 
 import java.io.IOException;
@@ -39,9 +41,10 @@ public class CheckoutActivity extends AppCompatActivity implements LocationListe
     private TextView totalCartPriceTxt, deliveryCartPriceTxt, totalPayableTxt, nameTxt, phoneTxt, addressTxt;
     private AppCompatButton orderBtn, changeDetailsBtn, currentAddressBtn;
 
-    private List<CartItem> cartItems;
+    private List<CartItem> items;
     private int total_cart_price = 0, delivery_price = 70;
     private String name = null, phone = null;
+    private double latitude = 0, longitude = 0;
 
     private static final int LOCATION_PERMISSION_CODE = 101, COARSE_LOCATION_PERMISSION_CODE = 102;
 
@@ -50,7 +53,7 @@ public class CheckoutActivity extends AppCompatActivity implements LocationListe
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_checkout);
 
-        cartItems = (List<CartItem>) getIntent().getSerializableExtra("CART_ITEM");
+        items = (List<CartItem>) getIntent().getSerializableExtra("CART_ITEM");
         total_cart_price = getIntent().getIntExtra("TOTAL_CART_PRICE", 0);
 
         closeBtn = findViewById(R.id.close);
@@ -91,8 +94,12 @@ public class CheckoutActivity extends AppCompatActivity implements LocationListe
 
                 GeoPoint geoPoint = getLatLongFromAddress(myAddress);
                 assert geoPoint != null;
+                latitude = geoPoint.getLatitude();
+                longitude = geoPoint.getLongitude();
+
                 double distance = calculateDistance(geoPoint.getLatitude(), geoPoint.getLongitude());
                 setPayablePrice(distance);
+
 
                 nameTxt.setText(name);
                 phoneTxt.setText(phone);
@@ -114,6 +121,40 @@ public class CheckoutActivity extends AppCompatActivity implements LocationListe
                     AddressBottomSheet.newInstance(nameTxt.getText().toString(), phoneTxt.getText().toString(), addressTxt.getText().toString()).show(getSupportFragmentManager(), "ADDRESS_DIALOG");
                     return;
                 }
+
+                int totalDiscount = 0;
+                for (CartItem i: items) {
+                    totalDiscount += i.getFood_data().getDiscount();
+                }
+
+                GeoPoint point = new GeoPoint(latitude, longitude);
+
+                DocumentReference doc = FirebaseFirestore.getInstance().collection("orders").document();
+                String orderId = doc.getId();
+
+                Order order = new Order(
+                        address,
+                        items,
+                        delivery_price,
+                        totalDiscount,
+                        point,
+                        name,
+                        orderId,
+                        0,
+                        true,
+                        total_cart_price + delivery_price,
+                        "cash",
+                        phone,
+                        System.currentTimeMillis(),
+                        total_cart_price,
+                        Auth.getAuthUserUid()
+                );
+
+                doc.set(order).addOnSuccessListener(unused -> {
+                    Toast.makeText(this, "Order Placed Successfully.", Toast.LENGTH_SHORT).show();
+                }).addOnFailureListener(e -> {
+                    Toast.makeText(this, "Order Failed!", Toast.LENGTH_SHORT).show();
+                });
             }
         });
 
@@ -138,7 +179,7 @@ public class CheckoutActivity extends AppCompatActivity implements LocationListe
 
     private List<CheckoutCartItem> createOrderItemList() {
         List<CheckoutCartItem> checkoutCartItems = new ArrayList<>();
-        for (CartItem cartItem : cartItems) {
+        for (CartItem cartItem : items) {
             String orderName = cartItem.getFood_data().getName();
             if (!cartItem.getTopping_ids().equals("None")) {
                 orderName = orderName + " + Toppings";
@@ -223,6 +264,9 @@ public class CheckoutActivity extends AppCompatActivity implements LocationListe
 
     @Override
     public void onLocationChanged(@NonNull Location location) {
+        latitude = location.getLatitude();
+        longitude = location.getLongitude();
+
         String myAddress = getAddressFromLatLong(location.getLatitude(), location.getLongitude());
         double distance = calculateDistance(location.getLatitude(), location.getLongitude());
         setPayablePrice(distance);
