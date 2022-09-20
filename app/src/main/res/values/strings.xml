@@ -69,6 +69,12 @@
     <string name="change_address">Change Address</string>
     <string name="no_address">No Address</string>
     <string name="set_current_location">Set Current Location</string>
+    <string name="phone_no">Phone no.</string>
+    <string name="your_delivery_details">Your Delivery Details</string>
+    <string name="no_phone">No Phone</string>
+    <string name="no_name">No Name</string>
+    <string name="change_details">Change Details</string>
+    <string name="don_t_add_91_in_front_of_the_number">Don\'t add +91 in front of the number.</string>
     <string-array name="payment_method">
         <item>Cash</item>
     </string-array>

@@ -10,8 +10,59 @@
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/your_address"
+        android:text="@string/your_delivery_details"
+        android:textSize="17sp"
         style="@style/Text"/>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/full_name"
+        style="@style/Text"
+        android:layout_marginTop="10dp"/>
+
+    <EditText
+        android:id="@+id/name"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="@string/full_name"
+        android:padding="10dp"
+        android:gravity="top"
+        android:inputType="textPersonName"
+        android:background="@drawable/border_block"
+        android:layout_marginTop="5dp"/>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/phone_no"
+        style="@style/Text"
+        android:layout_marginTop="10dp"/>
+
+    <EditText
+        android:id="@+id/phone"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="@string/phone_no"
+        android:padding="10dp"
+        android:gravity="top"
+        android:inputType="phone"
+        android:background="@drawable/border_block"
+        android:layout_marginTop="5dp"/>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="11sp"
+        android:text="@string/don_t_add_91_in_front_of_the_number"
+        android:paddingHorizontal="10dp"/>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/your_address"
+        style="@style/Text"
+        android:layout_marginTop="10dp"/>
 
     <EditText
         android:id="@+id/address"
@@ -20,6 +71,7 @@
         android:hint="@string/enter_your_address"
         android:padding="10dp"
         android:gravity="top"
+        android:lines="2"
         android:background="@drawable/border_block"
         android:layout_marginTop="5dp"/>
 

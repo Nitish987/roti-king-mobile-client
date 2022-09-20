@@ -36,11 +36,12 @@ import java.util.Objects;
 public class CheckoutActivity extends AppCompatActivity implements LocationListener {
     private RecyclerView cartItemRV;
     private ImageButton closeBtn;
-    private TextView totalCartPriceTxt, deliveryCartPriceTxt, totalPayableTxt, addressTxt;
-    private AppCompatButton orderBtn, changeAddressBtn, currentAddressBtn;
+    private TextView totalCartPriceTxt, deliveryCartPriceTxt, totalPayableTxt, nameTxt, phoneTxt, addressTxt;
+    private AppCompatButton orderBtn, changeDetailsBtn, currentAddressBtn;
 
     private List<CartItem> cartItems;
     private int total_cart_price = 0, delivery_price = 70;
+    private String name = null, phone = null;
 
     private static final int LOCATION_PERMISSION_CODE = 101, COARSE_LOCATION_PERMISSION_CODE = 102;
 
@@ -57,8 +58,10 @@ public class CheckoutActivity extends AppCompatActivity implements LocationListe
         deliveryCartPriceTxt = findViewById(R.id.delivery_price);
         totalPayableTxt = findViewById(R.id.payable_price);
         orderBtn = findViewById(R.id.place_order);
+        nameTxt = findViewById(R.id.name);
+        phoneTxt = findViewById(R.id.phone);
         addressTxt = findViewById(R.id.address);
-        changeAddressBtn = findViewById(R.id.change_address_btn);
+        changeDetailsBtn = findViewById(R.id.change_details_btn);
         currentAddressBtn = findViewById(R.id.current_address_btn);
 
         cartItemRV = findViewById(R.id.cart_item_rv);
@@ -67,6 +70,8 @@ public class CheckoutActivity extends AppCompatActivity implements LocationListe
 
         if (ActivityCompat.checkSelfPermission(CheckoutActivity.this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_DENIED || ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_DENIED) {
             checkLocationPermission();
+        } else {
+            setCurrentLocation();
         }
     }
 
@@ -80,25 +85,34 @@ public class CheckoutActivity extends AppCompatActivity implements LocationListe
 
         FirebaseFirestore.getInstance().collection("user").document(Objects.requireNonNull(Auth.getAuthUserUid())).addSnapshotListener((value, error) -> {
             if (value != null && value.exists()) {
+                name = value.get("name", String.class);
+                phone = value.get("phone", String.class);
                 String myAddress = value.get("address", String.class);
+
                 GeoPoint geoPoint = getLatLongFromAddress(myAddress);
                 assert geoPoint != null;
                 double distance = calculateDistance(geoPoint.getLatitude(), geoPoint.getLongitude());
                 setPayablePrice(distance);
 
+                nameTxt.setText(name);
+                phoneTxt.setText(phone);
                 addressTxt.setText(myAddress);
             }
         });
 
-        changeAddressBtn.setOnClickListener(view -> AddressBottomSheet.newInstance(addressTxt.getText().toString()).show(getSupportFragmentManager(), "ADDRESS_DIALOG"));
+        changeDetailsBtn.setOnClickListener(view -> AddressBottomSheet.newInstance(nameTxt.getText().toString(), phoneTxt.getText().toString(), addressTxt.getText().toString()).show(getSupportFragmentManager(), "ADDRESS_DIALOG"));
 
         orderBtn.setOnClickListener(view -> {
             if (ActivityCompat.checkSelfPermission(CheckoutActivity.this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_DENIED || ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_DENIED) {
                 checkLocationPermission();
             } else {
+                String name = nameTxt.getText().toString();
+                String phone = phoneTxt.getText().toString();
                 String address = addressTxt.getText().toString();
-                if (address.equals(getString(R.string.no_address))) {
-                    Toast.makeText(this, "No Address Provided.", Toast.LENGTH_SHORT).show();
+
+                if (name.equals(getString(R.string.no_name)) || phone.equals(getString(R.string.no_phone)) || address.equals(getString(R.string.no_address))) {
+                    AddressBottomSheet.newInstance(nameTxt.getText().toString(), phoneTxt.getText().toString(), addressTxt.getText().toString()).show(getSupportFragmentManager(), "ADDRESS_DIALOG");
+                    return;
                 }
             }
         });
@@ -176,9 +190,7 @@ public class CheckoutActivity extends AppCompatActivity implements LocationListe
 
         try {
             addresses = geocoder.getFromLocation(latitude, longitude, 1);
-            String address = addresses.get(0).getAddressLine(0);
-
-            return address;
+            return addresses.get(0).getAddressLine(0);
         } catch (IOException e) {
             e.printStackTrace();
             return null;
