@@ -2,10 +2,13 @@ package com.rotiking.client.models;
 
 import com.google.firebase.firestore.GeoPoint;
 
+import java.io.Serializable;
 import java.util.List;
 
-public class Order {
+public class Order implements Serializable {
     private String address;
+    private String agentName;
+    private String agentPhone;
     private List<CartItem> items;
     private int deliveryPrice;
     private int discount;
@@ -18,14 +21,17 @@ public class Order {
     private int payablePrice;
     private String paymentMethod;
     private String phone;
+    private String secureNumber;
     private long time;
     private int totalPrice;
     private String uid;
 
     public Order() {}
 
-    public Order(String address, List<CartItem> items, int deliveryPrice, int discount, GeoPoint location, String name, String orderId, int orderNumber, int orderState, boolean orderSuccess, int payablePrice, String paymentMethod, String phone, long time, int totalPrice, String uid) {
+    public Order(String address, String agentName, String agentPhone, List<CartItem> items, int deliveryPrice, int discount, GeoPoint location, String name, String orderId, int orderNumber, int orderState, boolean orderSuccess, int payablePrice, String paymentMethod, String phone, String secureNumber, long time, int totalPrice, String uid) {
         this.address = address;
+        this.agentName = agentName;
+        this.agentPhone = agentPhone;
         this.items = items;
         this.deliveryPrice = deliveryPrice;
         this.discount = discount;
@@ -38,6 +44,7 @@ public class Order {
         this.payablePrice = payablePrice;
         this.paymentMethod = paymentMethod;
         this.phone = phone;
+        this.secureNumber = secureNumber;
         this.time = time;
         this.totalPrice = totalPrice;
         this.uid = uid;
@@ -169,5 +176,29 @@ public class Order {
 
     public void setOrderNumber(int orderNumber) {
         this.orderNumber = orderNumber;
+    }
+
+    public String getAgentName() {
+        return agentName;
+    }
+
+    public void setAgentName(String agentName) {
+        this.agentName = agentName;
+    }
+
+    public String getAgentPhone() {
+        return agentPhone;
+    }
+
+    public void setAgentPhone(String agentPhone) {
+        this.agentPhone = agentPhone;
+    }
+
+    public String getSecureNumber() {
+        return secureNumber;
+    }
+
+    public void setSecureNumber(String secureNumber) {
+        this.secureNumber = secureNumber;
     }
 }

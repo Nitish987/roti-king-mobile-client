@@ -24,6 +24,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.GeoPoint;
 import com.rotiking.client.adapters.CheckoutCartItemRecyclerAdapter;
 import com.rotiking.client.common.auth.Auth;
+import com.rotiking.client.common.security.AES128;
 import com.rotiking.client.models.CartItem;
 import com.rotiking.client.models.CheckoutCartItem;
 import com.rotiking.client.models.Order;
@@ -132,8 +133,12 @@ public class CheckoutActivity extends AppCompatActivity implements LocationListe
                 DocumentReference doc = FirebaseFirestore.getInstance().collection("orders").document();
                 String orderId = doc.getId();
 
+                String secureNumber = AES128.encrypt(Auth.ENCRYPTION_KEY, Integer.toString((int) (Math.random() * 10000)));
+
                 Order order = new Order(
                         address,
+                        null,
+                        null,
                         items,
                         delivery_price,
                         totalDiscount,
@@ -146,6 +151,7 @@ public class CheckoutActivity extends AppCompatActivity implements LocationListe
                         total_cart_price + delivery_price,
                         "cash",
                         phone,
+                        secureNumber,
                         System.currentTimeMillis(),
                         total_cart_price,
                         Auth.getAuthUserUid()

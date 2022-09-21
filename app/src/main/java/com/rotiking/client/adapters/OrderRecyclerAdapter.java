@@ -1,5 +1,6 @@
 package com.rotiking.client.adapters;
 
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,9 +11,11 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.firebase.ui.firestore.FirestoreRecyclerAdapter;
 import com.firebase.ui.firestore.FirestoreRecyclerOptions;
+import com.rotiking.client.OrderDetailActivity;
 import com.rotiking.client.R;
 import com.rotiking.client.models.Order;
 
+import java.io.Serializable;
 import java.util.Date;
 
 public class OrderRecyclerAdapter extends FirestoreRecyclerAdapter<Order, OrderRecyclerAdapter.OrderHolder> {
@@ -25,9 +28,15 @@ public class OrderRecyclerAdapter extends FirestoreRecyclerAdapter<Order, OrderR
         holder.setOrderNumber(model.getOrderNumber());
         holder.setItems(model.getItems().size());
         holder.setPaymentMethod(model.getPaymentMethod());
-        holder.setStatus(model.getOrderState());
+        holder.setStatus(model.getOrderState(), model.isOrderSuccess());
         holder.setTime(model.getTime());
         holder.setPayableAmt(model.getPayablePrice());
+
+        holder.itemView.setOnClickListener(view -> {
+            Intent intent = new Intent(view.getContext(), OrderDetailActivity.class);
+            intent.putExtra("ORDER", model.getOrderId());
+            view.getContext().startActivity(intent);
+        });
     }
 
     @NonNull
@@ -64,14 +73,30 @@ public class OrderRecyclerAdapter extends FirestoreRecyclerAdapter<Order, OrderR
             this.paymentMethod.setText(st);
         }
 
-        public void setStatus(int status) {
+        public void setStatus(int state, boolean isOrderSuccess) {
             String st = "";
-            switch (status) {
-                case 0: st = "Ordered..."; break;
-                case 1: st = "Cooking..."; break;
-                case 2: st = "Dispatched..."; break;
-                case 3: st = "On way..."; break;
-                case 4: st = "Delivered..."; break;
+            if (isOrderSuccess) {
+                switch (state) {
+                    case 0:
+                        st = "Ordered...";
+                        break;
+                    case 1:
+                        st = "Cooking...";
+                        break;
+                    case 2:
+                        st = "Dispatched...";
+                        break;
+                    case 3:
+                        st = "On way...";
+                        break;
+                    case 4:
+                        st = "Delivered...";
+                        break;
+                }
+                this.status.setTextColor(itemView.getContext().getColor(R.color.green));
+            } else {
+                st = "Your order is canceled.";
+                this.status.setTextColor(itemView.getContext().getColor(R.color.red));
             }
             this.status.setText(st);
         }

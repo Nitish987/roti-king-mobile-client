@@ -25,6 +25,12 @@ public class AuthPreferences {
         editor.apply();
     }
 
+    public void setEncryptionKey(String encKey) {
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putString("ENC_KEY", encKey);
+        editor.apply();
+    }
+
     public String getAuthToken() {
         if (sharedPreferences == null) return null;
         return sharedPreferences.getString(TokenNames.AT, null);
@@ -33,6 +39,11 @@ public class AuthPreferences {
     public String getLoginToken() {
         if (sharedPreferences == null) return null;
         return sharedPreferences.getString(TokenNames.LT, null);
+    }
+
+    public String getEncryptionKey() {
+        if (sharedPreferences == null) return null;
+        return sharedPreferences.getString("ENC_KEY", null);
     }
 
     public void clear() {

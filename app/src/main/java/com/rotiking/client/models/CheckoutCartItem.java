@@ -1,6 +1,8 @@
 package com.rotiking.client.models;
 
-public class CheckoutCartItem {
+import java.io.Serializable;
+
+public class CheckoutCartItem implements Serializable {
     private String OrderName;
     private int OrderPrice;
 

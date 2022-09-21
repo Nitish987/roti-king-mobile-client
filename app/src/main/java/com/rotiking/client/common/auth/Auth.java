@@ -18,11 +18,13 @@ import java.util.Map;
 public class Auth {
     public static String AUTH_TOKEN = "";
     public static String LOGIN_TOKEN = "";
+    public static String ENCRYPTION_KEY = "";
 
     public static boolean isUserAuthenticated(Context context) {
         AuthPreferences preferences = new AuthPreferences(context);
         AUTH_TOKEN = preferences.getAuthToken();
         LOGIN_TOKEN = preferences.getLoginToken();
+        ENCRYPTION_KEY = preferences.getEncryptionKey();
         return AUTH_TOKEN != null && LOGIN_TOKEN != null && FirebaseAuth.getInstance().getCurrentUser() != null;
     }
 

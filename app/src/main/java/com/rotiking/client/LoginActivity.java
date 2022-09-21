@@ -12,6 +12,7 @@ import android.widget.Toast;
 
 import com.rotiking.client.common.auth.Auth;
 import com.rotiking.client.common.auth.AuthPreferences;
+import com.rotiking.client.common.security.AES128;
 import com.rotiking.client.utils.Promise;
 import com.rotiking.client.utils.Validator;
 import com.google.android.material.progressindicator.CircularProgressIndicator;
@@ -88,11 +89,16 @@ public class LoginActivity extends AppCompatActivity {
                         String fToken = data.getString("fToken");
                         String token = data.getString("token");
                         String login = data.getString("login");
+                        String encKey = data.getString("encKey");
 
+                        encKey = AES128.decrypt(AES128.NATIVE_ENCRYPTION_KEY, encKey);
+
+                        String finalEncKey = encKey;
                         FirebaseAuth.getInstance().signInWithCustomToken(fToken).addOnCompleteListener(task -> {
                             if (task.isSuccessful()) {
                                 AuthPreferences authPreferences = new AuthPreferences(LoginActivity.this);
                                 authPreferences.setAuthToken(token, login);
+                                authPreferences.setEncryptionKey(finalEncKey);
 
                                 Toast.makeText(LoginActivity.this, message, Toast.LENGTH_SHORT).show();
 
