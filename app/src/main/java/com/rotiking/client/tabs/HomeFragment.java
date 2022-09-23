@@ -36,7 +36,7 @@ import java.util.stream.Collectors;
 public class HomeFragment extends Fragment {
     private View view;
     private RecyclerView foodsCardRV, foodsRV;
-    private CircularProgressIndicator foodCardProgress;
+    private CircularProgressIndicator foodCardProgress, foodItemProgress;
     private ChipGroup foodFilters;
     private EditText search_eTxt;
     private AppCompatImageButton searchBtn;
@@ -61,6 +61,7 @@ public class HomeFragment extends Fragment {
         foodsRV.setHasFixedSize(true);
 
         foodCardProgress = view.findViewById(R.id.food_card_progress);
+        foodItemProgress = view.findViewById(R.id.food_item_progress);
         foodFilters = view.findViewById(R.id.food_filter);
         search_eTxt = view.findViewById(R.id.search);
         searchBtn = view.findViewById(R.id.search_btn);
@@ -76,6 +77,7 @@ public class HomeFragment extends Fragment {
             @Override
             public void resolving(int progress, String msg) {
                 foodCardProgress.setVisibility(View.VISIBLE);
+                foodItemProgress.setVisibility(View.VISIBLE);
                 foodFilters.setEnabled(false);
             }
 
@@ -83,6 +85,7 @@ public class HomeFragment extends Fragment {
             public void resolved(List<Food> foods_) {
                 foods = foods_;
                 foodCardProgress.setVisibility(View.GONE);
+                foodItemProgress.setVisibility(View.GONE);
                 foodFilters.setEnabled(true);
 
                 FoodCardRecyclerAdapter cardAdapter = new FoodCardRecyclerAdapter(foods, getParentFragmentManager());

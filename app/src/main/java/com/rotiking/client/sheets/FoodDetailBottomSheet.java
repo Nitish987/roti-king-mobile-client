@@ -19,6 +19,7 @@ import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
+import com.google.android.material.progressindicator.CircularProgressIndicator;
 import com.rotiking.client.CartActivity;
 import com.rotiking.client.R;
 import com.rotiking.client.adapters.ToppingItemRecyclerAdapter;
@@ -34,6 +35,7 @@ public class FoodDetailBottomSheet extends BottomSheetDialogFragment {
     private View view;
     private ImageView photo;
     private TextView name, foodType, description, includes, crossPrice, price, discount, ingredients, rating, available, quantityTxt, payableTxt;
+    private CircularProgressIndicator addToCartProgress;
     private AppCompatImageButton incQuantityBtn, decQuantityBtn;
     private AppCompatButton addToCartBtn, openCartBtn;
     private RecyclerView toppingsRV;
@@ -88,6 +90,7 @@ public class FoodDetailBottomSheet extends BottomSheetDialogFragment {
         decQuantityBtn = view.findViewById(R.id.dec_quantity);
         addToCartBtn = view.findViewById(R.id.add_to_cart_btn);
         openCartBtn = view.findViewById(R.id.open_cart_btn);
+        addToCartProgress = view.findViewById(R.id.add_to_cart_progress);
 
         crossPrice.setPaintFlags(crossPrice.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
 
@@ -162,15 +165,21 @@ public class FoodDetailBottomSheet extends BottomSheetDialogFragment {
             Database.addToCart(view1.getContext(), food.getFood_id(), quantity, toppingIds, new Promise<String>() {
                 @Override
                 public void resolving(int progress, String msg) {
+                    addToCartBtn.setVisibility(View.INVISIBLE);
+                    addToCartProgress.setVisibility(View.VISIBLE);
                 }
 
                 @Override
                 public void resolved(String message) {
+                    addToCartBtn.setVisibility(View.VISIBLE);
+                    addToCartProgress.setVisibility(View.GONE);
                     Toast.makeText(view.getContext(), message, Toast.LENGTH_SHORT).show();
                 }
 
                 @Override
                 public void reject(String err) {
+                    addToCartBtn.setVisibility(View.VISIBLE);
+                    addToCartProgress.setVisibility(View.GONE);
                     Toast.makeText(view.getContext(), err, Toast.LENGTH_SHORT).show();
                 }
             });

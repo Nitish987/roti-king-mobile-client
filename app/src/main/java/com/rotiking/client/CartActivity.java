@@ -7,10 +7,13 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.material.progressindicator.CircularProgressIndicator;
 import com.google.gson.Gson;
 import com.rotiking.client.adapters.CartItemRecyclerAdapter;
 import com.rotiking.client.common.db.Database;
@@ -30,6 +33,8 @@ public class CartActivity extends AppCompatActivity {
     private ImageButton closeBtn;
     private AppCompatButton checkoutBtn;
     private TextView totalCartPriceTxt;
+    private CircularProgressIndicator cartItemProgress;
+    private LinearLayout emptyCartI;
 
     private List<CartItem> cartItems;
     private int total_cart_price = 0;
@@ -42,6 +47,8 @@ public class CartActivity extends AppCompatActivity {
         closeBtn = findViewById(R.id.close);
         totalCartPriceTxt = findViewById(R.id.total_cart_price);
         checkoutBtn = findViewById(R.id.checkout);
+        cartItemProgress = findViewById(R.id.cart_item_progress);
+        emptyCartI = findViewById(R.id.empty_cart_i);
 
         cartItemRV = findViewById(R.id.cart_item_rv);
         cartItemRV.setLayoutManager(new LinearLayoutManager(this, RecyclerView.VERTICAL, false));
@@ -56,14 +63,20 @@ public class CartActivity extends AppCompatActivity {
         Database.getCartItems(this, new Promise<JSONObject>() {
             @Override
             public void resolving(int progress, String msg) {
-
+                cartItemProgress.setVisibility(View.VISIBLE);
             }
 
             @Override
             public void resolved(JSONObject data) {
+                cartItemProgress.setVisibility(View.GONE);
                 try {
                     Gson gson = new Gson();
                     cartItems = Arrays.asList(gson.fromJson(data.getJSONArray("cart").toString(), CartItem[].class));
+
+                    if (cartItems.isEmpty()) {
+                        emptyCartI.setVisibility(View.VISIBLE);
+                    }
+
                     total_cart_price = data.getInt("total_cart_price");
 
                     String pri_ = "\u20B9 " + total_cart_price;
@@ -82,6 +95,7 @@ public class CartActivity extends AppCompatActivity {
 
             @Override
             public void reject(String err) {
+                cartItemProgress.setVisibility(View.GONE);
                 Toast.makeText(CartActivity.this, err, Toast.LENGTH_SHORT).show();
             }
         });

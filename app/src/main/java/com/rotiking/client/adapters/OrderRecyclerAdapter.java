@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -15,16 +16,20 @@ import com.rotiking.client.OrderDetailActivity;
 import com.rotiking.client.R;
 import com.rotiking.client.models.Order;
 
-import java.io.Serializable;
 import java.util.Date;
 
 public class OrderRecyclerAdapter extends FirestoreRecyclerAdapter<Order, OrderRecyclerAdapter.OrderHolder> {
-    public OrderRecyclerAdapter(@NonNull FirestoreRecyclerOptions<Order> options) {
+    private final LinearLayout noOrdersI;
+
+    public OrderRecyclerAdapter(@NonNull FirestoreRecyclerOptions<Order> options, LinearLayout noOrdersI) {
         super(options);
+        this.noOrdersI = noOrdersI;
     }
 
     @Override
     protected void onBindViewHolder(@NonNull OrderRecyclerAdapter.OrderHolder holder, int position, @NonNull Order model) {
+        noOrdersI.setVisibility(View.INVISIBLE);
+
         holder.setOrderNumber(model.getOrderNumber());
         holder.setItems(model.getItems().size());
         holder.setPaymentMethod(model.getPaymentMethod());
