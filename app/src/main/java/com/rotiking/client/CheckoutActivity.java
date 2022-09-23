@@ -13,9 +13,9 @@ import android.content.pm.PackageManager;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
-import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -37,14 +37,14 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 
-public class CheckoutActivity extends AppCompatActivity implements LocationListener {
+public class CheckoutActivity extends AppCompatActivity {
     private RecyclerView cartItemRV;
     private ImageButton closeBtn;
     private TextView totalCartPriceTxt, deliveryCartPriceTxt, totalPayableTxt, nameTxt, phoneTxt, addressTxt;
     private AppCompatButton orderBtn, changeDetailsBtn, currentAddressBtn;
 
     private List<CartItem> items;
-    private int total_cart_price = 0, delivery_price = 70;
+    private int total_cart_price = 0, delivery_price = 0;
     private String name = null, phone = null;
     private double latitude = 0, longitude = 0;
 
@@ -75,8 +75,6 @@ public class CheckoutActivity extends AppCompatActivity implements LocationListe
 
         if (ActivityCompat.checkSelfPermission(CheckoutActivity.this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_DENIED || ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_DENIED) {
             checkLocationPermission();
-        } else {
-            setCurrentLocation();
         }
     }
 
@@ -163,9 +161,7 @@ public class CheckoutActivity extends AppCompatActivity implements LocationListe
                     intent.putExtra("ORDER", orderId);
                     startActivity(intent);
                     finish();
-                }).addOnFailureListener(e -> {
-                    Toast.makeText(this, "Order Failed!", Toast.LENGTH_SHORT).show();
-                });
+                }).addOnFailureListener(e -> Toast.makeText(this, "Unable to place order.", Toast.LENGTH_SHORT).show());
             }
         });
 
@@ -175,13 +171,26 @@ public class CheckoutActivity extends AppCompatActivity implements LocationListe
     }
 
     private void setPayablePrice(double distance) {
+        orderBtn.setVisibility(View.VISIBLE);
+        orderBtn.setEnabled(true);
+        
         if (distance <= 6) delivery_price = 30;
         else if (distance >= 7 && distance <= 11) delivery_price = 50;
+        else if (distance >= 12 && distance <= 20) delivery_price = 70;
+        else {
+            orderBtn.setVisibility(View.GONE);
+            orderBtn.setEnabled(false);
+            Toast.makeText(this, "Sorry! we cannot deliver in your range.", Toast.LENGTH_SHORT).show();
+            delivery_price = 0;
+        }
 
         String tcp = "\u20B9 " + total_cart_price;
         totalCartPriceTxt.setText(tcp);
 
         String dp_ = "\u20B9 " + delivery_price;
+        if (delivery_price == 0) {
+            dp_ = "No Delivery.";
+        }
         deliveryCartPriceTxt.setText(dp_);
 
         String tp_ = "\u20B9 " + (total_cart_price + delivery_price);
@@ -226,7 +235,7 @@ public class CheckoutActivity extends AppCompatActivity implements LocationListe
             location.getLatitude();
             location.getLongitude();
 
-            p1 = new GeoPoint((double) (location.getLatitude()), (double) (location.getLongitude()));
+            p1 = new GeoPoint(location.getLatitude(), location.getLongitude());
 
             return p1;
         } catch (IOException e) {
@@ -267,21 +276,18 @@ public class CheckoutActivity extends AppCompatActivity implements LocationListe
     private void setCurrentLocation() {
         if (ActivityCompat.checkSelfPermission(CheckoutActivity.this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(CheckoutActivity.this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             LocationManager manager = (LocationManager) getSystemService(LOCATION_SERVICE);
-            manager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, this);
+            manager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, location -> {
+                latitude = location.getLatitude();
+                longitude = location.getLongitude();
+
+                String myAddress = getAddressFromLatLong(location.getLatitude(), location.getLongitude());
+                double distance = calculateDistance(location.getLatitude(), location.getLongitude());
+                setPayablePrice(distance);
+
+                addressTxt.setText(myAddress);
+            });
         } else {
             Toast.makeText(CheckoutActivity.this, "Location is required for delivery purpose.", Toast.LENGTH_SHORT).show();
         }
-    }
-
-    @Override
-    public void onLocationChanged(@NonNull Location location) {
-        latitude = location.getLatitude();
-        longitude = location.getLongitude();
-
-        String myAddress = getAddressFromLatLong(location.getLatitude(), location.getLongitude());
-        double distance = calculateDistance(location.getLatitude(), location.getLongitude());
-        setPayablePrice(distance);
-
-        addressTxt.setText(myAddress);
     }
 }

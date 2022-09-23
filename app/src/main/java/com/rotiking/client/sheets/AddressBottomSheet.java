@@ -57,9 +57,9 @@ public class AddressBottomSheet extends BottomSheetDialogFragment {
         address = view.findViewById(R.id.address);
         saveAddressBtn = view.findViewById(R.id.save_address);
 
-        name.setText(myName);
-        phone.setText(myPhone);
-        address.setText(myAddress);
+        if (!myName.equals(getString(R.string.no_name))) name.setText(myName);
+        if (!myPhone.equals(getString(R.string.no_phone))) phone.setText(myPhone.substring(3));
+        if (!myAddress.equals(getString(R.string.no_address))) address.setText(myAddress);
 
         return view;
     }
