@@ -8,6 +8,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.Manifest;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Address;
 import android.location.Geocoder;
@@ -158,7 +159,10 @@ public class CheckoutActivity extends AppCompatActivity implements LocationListe
                 );
 
                 doc.set(order).addOnSuccessListener(unused -> {
-                    Toast.makeText(this, "Order Placed Successfully.", Toast.LENGTH_SHORT).show();
+                    Intent intent = new Intent(CheckoutActivity.this, OrderSuccessActivity.class);
+                    intent.putExtra("ORDER", orderId);
+                    startActivity(intent);
+                    finish();
                 }).addOnFailureListener(e -> {
                     Toast.makeText(this, "Order Failed!", Toast.LENGTH_SHORT).show();
                 });

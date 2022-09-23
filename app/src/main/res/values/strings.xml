@@ -91,6 +91,8 @@
     <string name="delivery_verification_code">Delivery Verification Code</string>
     <string name="share_the_code_to_your_delivery_agent_only_when_you_get_your_food_package">Share the code to your delivery agent only when you get your food package in your hand.</string>
     <string name="_0000">0000</string>
+    <string name="order_successful">Order Successful</string>
+    <string name="view_order_details">View Order Details</string>
     <string-array name="payment_method">
         <item>Cash</item>
     </string-array>

@@ -1,5 +1,6 @@
 package com.rotiking.client;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.AppCompatButton;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -10,6 +11,7 @@ import android.view.View;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.material.progressindicator.LinearProgressIndicator;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -22,7 +24,9 @@ import com.rotiking.client.models.Order;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class OrderDetailActivity extends AppCompatActivity {
     private RecyclerView orderItemRV;
@@ -79,6 +83,7 @@ public class OrderDetailActivity extends AppCompatActivity {
             if (value != null && value.exists()) {
                 Order order = value.toObject(Order.class);
 
+                assert order != null;
                 CheckoutCartItemRecyclerAdapter adapter = new CheckoutCartItemRecyclerAdapter(createOrderItemList(order.getItems()));
                 orderItemRV.setAdapter(adapter);
 
@@ -160,7 +165,7 @@ public class OrderDetailActivity extends AppCompatActivity {
 
                 if (!order.isOrderSuccess()) {
                     orderStateIndicator.setProgressCompat(0, true);
-                    String cancelMsg = "Your Order is Canceled.";
+                    String cancelMsg = "Your Order was Canceled.";
                     cancelOrderBtn.setText(cancelMsg);
                     cancelOrderBtn.setEnabled(false);
                     orderedStateTxt.setText(cancelMsg);
@@ -168,6 +173,22 @@ public class OrderDetailActivity extends AppCompatActivity {
                     deliveryVerificationDesk.setVisibility(View.GONE);
                 }
             }
+        });
+
+        cancelOrderBtn.setOnClickListener(view -> {
+            AlertDialog.Builder alert = new AlertDialog.Builder(this);
+            alert.setTitle("Order Cancel");
+            alert.setMessage("Are you sure, you want to cancel your order.");
+            alert.setCancelable(true);
+            alert.setPositiveButton("Yes", (dialogInterface, i) -> {
+                Map<String, Object> map = new HashMap<>();
+                map.put("orderSuccess", false);
+                FirebaseFirestore.getInstance().collection("orders").document(orderId).update(map)
+                        .addOnSuccessListener(unused -> Toast.makeText(this, "Your Order was canceled.", Toast.LENGTH_SHORT).show())
+                        .addOnFailureListener(e -> Toast.makeText(this, "Unable to cancel Order.", Toast.LENGTH_SHORT).show());
+            });
+            alert.setNegativeButton("No", (dialogInterface, i) -> dialogInterface.dismiss());
+            alert.show();
         });
 
         closeBtn.setOnClickListener(view -> finish());

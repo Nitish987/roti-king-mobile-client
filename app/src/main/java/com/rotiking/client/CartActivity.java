@@ -93,10 +93,15 @@ public class CartActivity extends AppCompatActivity {
                     newCartList.add(item);
                 }
             }
-            Intent intent = new Intent(this, CheckoutActivity.class);
-            intent.putExtra("CART_ITEM", (Serializable) newCartList);
-            intent.putExtra("TOTAL_CART_PRICE", total_cart_price);
-            startActivity(intent);
+            if (newCartList.isEmpty()) {
+                Toast.makeText(this, "Please select or add some items to your cart before Checkout.", Toast.LENGTH_LONG).show();
+            } else {
+                Intent intent = new Intent(this, CheckoutActivity.class);
+                intent.putExtra("CART_ITEM", (Serializable) newCartList);
+                intent.putExtra("TOTAL_CART_PRICE", total_cart_price);
+                startActivity(intent);
+                finish();
+            }
         });
     }
 }

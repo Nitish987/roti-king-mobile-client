@@ -148,4 +148,34 @@ public class Database {
                 }
         );
     }
+
+    public static void clearCartItems(Context context, Promise<String> promise) {
+        Map<String, String> headers = new HashMap<>();
+        headers.put("RAK", ApiKey.REQUEST_API_KEY);
+        headers.put("AT", Auth.AUTH_TOKEN);
+        headers.put("LT", Auth.LOGIN_TOKEN);
+
+        Server.request(context, Request.Method.DELETE, ApiKey.REQUEST_API_URL + "client/clear-my-cart/", headers, null, new Promise<JSONObject>() {
+                    @Override
+                    public void resolving(int progress, String msg) {
+                        promise.resolving(progress, msg);
+                    }
+
+                    @Override
+                    public void resolved(JSONObject data) {
+                        try {
+                            promise.resolved(data.getString("message"));
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                            promise.reject("Something went wrong.");
+                        }
+                    }
+
+                    @Override
+                    public void reject(String err) {
+                        promise.reject(err);
+                    }
+                }
+        );
+    }
 }
