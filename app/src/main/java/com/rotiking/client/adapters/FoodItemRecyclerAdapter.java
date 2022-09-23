@@ -14,6 +14,7 @@ import com.bumptech.glide.Glide;
 import com.rotiking.client.R;
 import com.rotiking.client.models.Food;
 import com.rotiking.client.sheets.FoodDetailBottomSheet;
+import com.rotiking.client.sheets.RatingBottomSheet;
 
 import java.util.List;
 
@@ -42,6 +43,7 @@ public class FoodItemRecyclerAdapter extends RecyclerView.Adapter<FoodItemRecycl
         holder.setRating(food.getRating());
 
         holder.itemView.setOnClickListener(view -> FoodDetailBottomSheet.newInstance(food).show(fragmentManager, "FOOD_DETAIL_DIALOG"));
+        holder.rating.setOnClickListener(view -> RatingBottomSheet.newInstance(food.getFood_id(), food.getName()).show(fragmentManager, "RATING_DIALOG"));
     }
 
     @Override

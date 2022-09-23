@@ -178,4 +178,73 @@ public class Database {
                 }
         );
     }
+
+    public static void setRating(Context context, String foodId, double rating, Promise<String> promise) {
+        Map<String, String> headers = new HashMap<>();
+        headers.put("RAK", ApiKey.REQUEST_API_KEY);
+        headers.put("AT", Auth.AUTH_TOKEN);
+        headers.put("LT", Auth.LOGIN_TOKEN);
+
+        JSONObject rate = new JSONObject();
+        try {
+            rate.put("food_id", foodId);
+            rate.put("rating", rating);
+        } catch (JSONException e) {
+            e.printStackTrace();
+            return;
+        }
+
+        Server.request(context, Request.Method.POST, ApiKey.REQUEST_API_URL + "client/set-food-rating/", headers, rate, new Promise<JSONObject>() {
+                    @Override
+                    public void resolving(int progress, String msg) {
+                        promise.resolving(progress, msg);
+                    }
+
+                    @Override
+                    public void resolved(JSONObject data) {
+                        try {
+                            promise.resolved(data.getString("message"));
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                            promise.reject("Something went wrong.");
+                        }
+                    }
+
+                    @Override
+                    public void reject(String err) {
+                        promise.reject(err);
+                    }
+                }
+        );
+    }
+
+    public static void getRating(Context context, String foodId, Promise<Double> promise) {
+        Map<String, String> headers = new HashMap<>();
+        headers.put("RAK", ApiKey.REQUEST_API_KEY);
+        headers.put("AT", Auth.AUTH_TOKEN);
+        headers.put("LT", Auth.LOGIN_TOKEN);
+
+        Server.request(context, Request.Method.GET, ApiKey.REQUEST_API_URL + "client/get-food-rating/" + foodId + "/", headers, null, new Promise<JSONObject>() {
+                    @Override
+                    public void resolving(int progress, String msg) {
+                        promise.resolving(progress, msg);
+                    }
+
+                    @Override
+                    public void resolved(JSONObject data) {
+                        try {
+                            promise.resolved(data.getDouble("rating"));
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                            promise.reject("Something went wrong.");
+                        }
+                    }
+
+                    @Override
+                    public void reject(String err) {
+                        promise.reject(err);
+                    }
+                }
+        );
+    }
 }

@@ -43,7 +43,7 @@ public class FoodCardRecyclerAdapter extends RecyclerView.Adapter<FoodCardRecycl
         holder.setRating(food.getRating());
 
         holder.itemView.setOnClickListener(view -> FoodDetailBottomSheet.newInstance(food).show(fragmentManager, "FOOD_DETAIL_DIALOG"));
-        holder.rating.setOnClickListener(view -> RatingBottomSheet.newInstance(food.getFood_id(), food.getRating()).show(fragmentManager, "RATING_DIALOG"));
+        holder.rating.setOnClickListener(view -> RatingBottomSheet.newInstance(food.getFood_id(), food.getName()).show(fragmentManager, "RATING_DIALOG"));
     }
 
     @Override
