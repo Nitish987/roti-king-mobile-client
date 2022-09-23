@@ -22,7 +22,7 @@ import org.json.JSONObject;
 
 public class LoginActivity extends AppCompatActivity {
     private AppCompatButton loginBtn;
-    private TextView signupTxt;
+    private TextView signupTxt, forgetPasswordTxt;
     private EditText email_eTxt, password_eTxt;
     private CircularProgressIndicator loginProgress;
 
@@ -36,6 +36,7 @@ public class LoginActivity extends AppCompatActivity {
         loginBtn = findViewById(R.id.login_btn);
         signupTxt = findViewById(R.id.signup_txt);
         loginProgress = findViewById(R.id.login_progress);
+        forgetPasswordTxt = findViewById(R.id.forget_password);
     }
 
     @Override
@@ -124,6 +125,11 @@ public class LoginActivity extends AppCompatActivity {
                     loginBtn.setVisibility(View.VISIBLE);
                 }
             });
+        });
+
+        forgetPasswordTxt.setOnClickListener(view -> {
+            Intent intent = new Intent(this, RecoverPasswordActivity.class);
+            startActivity(intent);
         });
     }
 }

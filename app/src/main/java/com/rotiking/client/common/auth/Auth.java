@@ -178,6 +178,106 @@ public class Auth {
         }
     }
 
+    public static class Recovery {
+        public static void recoverAccount(Context context, String email, Promise<JSONObject> promise) {
+            Map<String, String> headers = new HashMap<>();
+            headers.put("RAK", ApiKey.REQUEST_API_KEY);
+
+            JSONObject body = new JSONObject();
+            try {
+                body.put("email", email);
+            } catch (JSONException e) {
+                promise.reject("Unable to Signup.");
+                e.printStackTrace();
+                return;
+            }
+
+            Server.request(context, Request.Method.POST, ApiKey.REQUEST_API_URL + "account/recover-password/", headers, body, new Promise<JSONObject>() {
+                        @Override
+                        public void resolving(int progress, String msg) {
+                            promise.resolving(progress, msg);
+                        }
+
+                        @Override
+                        public void resolved(JSONObject data) {
+                            promise.resolved(data);
+                        }
+
+                        @Override
+                        public void reject(String err) {
+                            promise.reject(err);
+                        }
+                    }
+            );
+        }
+
+        public static void recoverAccountOtpVerification(Context context, String token, String otp, Promise<JSONObject> promise) {
+            Map<String, String> headers = new HashMap<>();
+            headers.put("RAK", ApiKey.REQUEST_API_KEY);
+            headers.put("RAOT", token);
+
+            JSONObject body = new JSONObject();
+            try {
+                body.put("otp", otp);
+            } catch (JSONException e) {
+                promise.reject("Unable to Verify.");
+                e.printStackTrace();
+                return;
+            }
+
+            Server.request(context, Request.Method.POST, ApiKey.REQUEST_API_URL + "account/recover-password-otp/", headers, body, new Promise<JSONObject>() {
+                        @Override
+                        public void resolving(int progress, String msg) {
+                            promise.resolving(progress, msg);
+                        }
+
+                        @Override
+                        public void resolved(JSONObject data) {
+                            promise.resolved(data);
+                        }
+
+                        @Override
+                        public void reject(String err) {
+                            promise.reject(err);
+                        }
+                    }
+            );
+        }
+
+        public static void recoveryPasswordCreation(Context context, String token, String password, Promise<JSONObject> promise) {
+            Map<String, String> headers = new HashMap<>();
+            headers.put("RAK", ApiKey.REQUEST_API_KEY);
+            headers.put("RAPT", token);
+
+            JSONObject body = new JSONObject();
+            try {
+                body.put("password", password);
+            } catch (JSONException e) {
+                promise.reject("Unable to signup.");
+                e.printStackTrace();
+                return;
+            }
+
+            Server.request(context, Request.Method.POST, ApiKey.REQUEST_API_URL + "account/recover-new-password/", headers, body, new Promise<JSONObject>() {
+                        @Override
+                        public void resolving(int progress, String msg) {
+                            promise.resolving(progress, msg);
+                        }
+
+                        @Override
+                        public void resolved(JSONObject data) {
+                            promise.resolved(data);
+                        }
+
+                        @Override
+                        public void reject(String err) {
+                            promise.reject(err);
+                        }
+                    }
+            );
+        }
+    }
+
     public static class Account {
         public static void profile(Context context, Promise<JSONObject> promise) {
             Map<String, String> headers = new HashMap<>();

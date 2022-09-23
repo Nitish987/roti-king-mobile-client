@@ -101,6 +101,9 @@
     <string name="logout">logout</string>
     <string name="change_photo">Edit Photo</string>
     <string name="photo">Photo</string>
+    <string name="account_recovery">Account Recovery</string>
+    <string name="enter_your_email">Enter your Email</string>
+    <string name="recover">Recover</string>
     <string-array name="payment_method">
         <item>Cash</item>
     </string-array>
