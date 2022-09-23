@@ -23,10 +23,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         if (!Auth.isUserAuthenticated(this)) {
-            Intent intent = new Intent(this, LoginActivity.class);
-            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-            startActivity(intent);
-            finish();
+            toLoginActivity();
         }
 
         tabs = findViewById(R.id.tabs);
@@ -37,6 +34,12 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
+        Auth.setAuthStateListener(firebaseAuth -> {
+            if (!Auth.isUserAuthenticated(this)) {
+                toLoginActivity();
+            }
+        });
+
         tabs.setOnItemSelectedListener(item -> {
             switch (item.getItemId()) {
                 case R.id.home:
@@ -56,5 +59,12 @@ public class MainActivity extends AppCompatActivity {
             Intent intent = new Intent(this, CartActivity.class);
             startActivity(intent);
         });
+    }
+
+    private void toLoginActivity() {
+        Intent intent = new Intent(this, LoginActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        startActivity(intent);
+        finish();
     }
 }

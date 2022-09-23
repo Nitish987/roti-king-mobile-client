@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MyPhotoActivity"
+    android:orientation="vertical">
+
+    <RelativeLayout
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:orientation="horizontal"
+        android:padding="10dp">
+
+        <ImageView
+            android:layout_width="80dp"
+            android:layout_height="wrap_content"
+            android:layout_alignParentStart="true"
+            android:layout_centerVertical="true"
+            style="@style/ImgTextLogo"
+            android:contentDescription="@string/app_name"/>
+
+        <ImageButton
+            android:id="@+id/edit_photo"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true"
+            android:layout_marginEnd="45dp"
+            android:background="@color/transparent"
+            android:contentDescription="@string/close"
+            android:src="@drawable/ic_baseline_edit_24" />
+
+        <ImageButton
+            android:id="@+id/close"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true"
+            android:background="@color/transparent"
+            android:contentDescription="@string/close"
+            android:src="@drawable/ic_baseline_close_24" />
+
+    </RelativeLayout>
+
+    <ImageView
+        android:id="@+id/photo"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@id/change_photo_btn_desk"
+        android:layout_below="@+id/toolbar"
+        android:src="@drawable/ic_baseline_account_box_24"
+        android:contentDescription="@string/photo"/>
+
+    <RelativeLayout
+        android:id="@+id/change_photo_btn_desk"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true">
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/change_photo_btn"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            style="@style/Button"
+            android:text="@string/save"
+            android:layout_margin="10dp"
+            android:visibility="gone"/>
+
+        <com.google.android.material.progressindicator.CircularProgressIndicator
+            android:id="@+id/change_photo_progress"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:indeterminate="true"
+            android:visibility="gone"/>
+
+    </RelativeLayout>
+
+</RelativeLayout>

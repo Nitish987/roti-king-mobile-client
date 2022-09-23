@@ -97,6 +97,10 @@
     <string name="you_have_not_ordered_anything">You have not ordered anything.</string>
     <string name="no_food_item_found">No food item found.</string>
     <string name="username">Username</string>
+    <string name="these_details_will_be_shared_to_our_delivery_agent_to_contact_you_while_delivering_your_food_package">These details will be shared to our delivery agent to contact you while delivering your food package. Click to Edit the details.</string>
+    <string name="logout">logout</string>
+    <string name="change_photo">Edit Photo</string>
+    <string name="photo">Photo</string>
     <string-array name="payment_method">
         <item>Cash</item>
     </string-array>

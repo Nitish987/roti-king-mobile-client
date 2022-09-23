@@ -35,6 +35,10 @@ public class Auth {
         return null;
     }
 
+    public static void setAuthStateListener(FirebaseAuth.AuthStateListener listener) {
+        FirebaseAuth.getInstance().addAuthStateListener(listener);
+    }
+
     public static class Signup {
         public static void signup(Context context, String name, String email, Promise<JSONObject> promise) {
             Map<String, String> headers = new HashMap<>();
@@ -174,34 +178,67 @@ public class Auth {
         }
     }
 
-//    public static class Account {
-//        public static void profile(Context context, Promise<JSONObject> promise) {
-//            promise.resolving(0, null);
-//
-//            String url = ApiKey.REQUEST_API_URL + "account/profile/";
-//            RequestQueue queue = Volley.newRequestQueue(context);
-//            promise.resolving(33, null);
-//
-//            promise.resolving(75, null);
-//            queue.add(new JsonObjectRequest(
-//                    Request.Method.GET,
-//                    url,
-//                    null,
-//                    response -> {
-//                        promise.resolving(100, null);
-//                        promise.resolved(response);
-//                    },
-//                    error -> promise.reject("unable to load Profile!")
-//            ) {
-//                @Override
-//                public Map<String, String> getHeaders() {
-//                    Map<String, String> headers = new HashMap<>();
-//                    headers.put("RAK", ApiKey.REQUEST_API_KEY);
-//                    headers.put("AT", AUTH_TOKEN);
-//                    headers.put("LT", LOGIN_TOKEN);
-//                    return headers;
-//                }
-//            });
-//        }
-//    }
+    public static class Account {
+        public static void profile(Context context, Promise<JSONObject> promise) {
+            Map<String, String> headers = new HashMap<>();
+            headers.put("RAK", ApiKey.REQUEST_API_KEY);
+            headers.put("AT", Auth.AUTH_TOKEN);
+            headers.put("LT", Auth.LOGIN_TOKEN);
+
+            Server.request(context, Request.Method.GET, ApiKey.REQUEST_API_URL + "account/profile/", headers, null, new Promise<JSONObject>() {
+                        @Override
+                        public void resolving(int progress, String msg) {
+                            promise.resolving(progress, msg);
+                        }
+
+                        @Override
+                        public void resolved(JSONObject data) {
+                            promise.resolved(data);
+                        }
+
+                        @Override
+                        public void reject(String err) {
+                            promise.reject(err);
+                        }
+                    }
+            );
+        }
+
+        public static void setProfilePhoto(Context context, String photo, Promise<String> promise) {
+            Map<String, String> headers = new HashMap<>();
+            headers.put("RAK", ApiKey.REQUEST_API_KEY);
+            headers.put("AT", Auth.AUTH_TOKEN);
+            headers.put("LT", Auth.LOGIN_TOKEN);
+
+            JSONObject profile = new JSONObject();
+            try {
+                profile.put("photo", photo);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+
+            Server.request(context, Request.Method.POST, ApiKey.REQUEST_API_URL + "account/profile-photo/", headers, profile, new Promise<JSONObject>() {
+                        @Override
+                        public void resolving(int progress, String msg) {
+                            promise.resolving(progress, msg);
+                        }
+
+                        @Override
+                        public void resolved(JSONObject data) {
+                            try {
+                                promise.resolved(data.getString("message"));
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                                promise.reject("Something went wrong.");
+                            }
+                        }
+
+                        @Override
+                        public void reject(String err) {
+                            promise.reject(err);
+                        }
+                    }
+            );
+        }
+    }
 }
