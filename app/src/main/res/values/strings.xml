@@ -95,6 +95,7 @@
     <string name="view_order_details">View Order Details</string>
     <string name="your_cart_is_empty">Your cart is empty.</string>
     <string name="you_have_not_ordered_anything">You have not ordered anything.</string>
+    <string name="no_food_item_found">No food item found.</string>
     <string-array name="payment_method">
         <item>Cash</item>
     </string-array>

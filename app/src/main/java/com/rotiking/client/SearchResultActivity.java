@@ -8,6 +8,7 @@ import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import com.google.android.material.chip.ChipGroup;
@@ -25,6 +26,7 @@ public class SearchResultActivity extends AppCompatActivity {
     private ChipGroup foodFilters;
     private ImageButton closeBtn;
     private CircularProgressIndicator foodSearchProgress;
+    private LinearLayout noFoodItemI;
 
     private String query;
     private List<Food> foods;
@@ -41,6 +43,7 @@ public class SearchResultActivity extends AppCompatActivity {
         foodFilters = findViewById(R.id.food_filter);
         closeBtn = findViewById(R.id.close);
         foodSearchProgress = findViewById(R.id.food_item_progress);
+        noFoodItemI = findViewById(R.id.no_food_item_i);
 
         query = getIntent().getStringExtra("SEARCH_QUERY");
         foods = (List<Food>) getIntent().getSerializableExtra("FOOD_DATA");
@@ -62,6 +65,10 @@ public class SearchResultActivity extends AppCompatActivity {
                 foodFilters.setEnabled(true);
                 foodSearchProgress.setVisibility(View.INVISIBLE);
 
+                if (foods.isEmpty()) {
+                    noFoodItemI.setVisibility(View.VISIBLE);
+                }
+
                 FoodItemRecyclerAdapter itemAdapter = new FoodItemRecyclerAdapter(foods, getSupportFragmentManager());
                 foodsRV.setAdapter(itemAdapter);
             }
@@ -69,6 +76,7 @@ public class SearchResultActivity extends AppCompatActivity {
             @Override
             public void reject(String err) {
                 foodFilters.setEnabled(false);
+                foodSearchProgress.setVisibility(View.INVISIBLE);
                 Toast.makeText(SearchResultActivity.this, err, Toast.LENGTH_SHORT).show();
             }
         });
@@ -76,21 +84,37 @@ public class SearchResultActivity extends AppCompatActivity {
         foodFilters.setOnCheckedStateChangeListener((group, checkedIds) -> {
             switch (group.getCheckedChipId()) {
                 case R.id.breakfast:
+                    noFoodItemI.setVisibility(View.VISIBLE);
                     List<Food> breakfast = performFoodQueryFilter("breakfast");
+                    if (!breakfast.isEmpty()) {
+                        noFoodItemI.setVisibility(View.GONE);
+                    }
                     foodsRV.swapAdapter(new FoodItemRecyclerAdapter(breakfast, getSupportFragmentManager()), true);
                     break;
 
                 case R.id.lunch:
+                    noFoodItemI.setVisibility(View.VISIBLE);
                     List<Food> lunch = performFoodQueryFilter("lunch");
+                    if (!lunch.isEmpty()) {
+                        noFoodItemI.setVisibility(View.GONE);
+                    }
                     foodsRV.swapAdapter(new FoodItemRecyclerAdapter(lunch, getSupportFragmentManager()), true);
                     break;
 
                 case R.id.dinner:
+                    noFoodItemI.setVisibility(View.VISIBLE);
                     List<Food> dinner = performFoodQueryFilter("dinner");
+                    if (!dinner.isEmpty()) {
+                        noFoodItemI.setVisibility(View.GONE);
+                    }
                     foodsRV.swapAdapter(new FoodItemRecyclerAdapter(dinner, getSupportFragmentManager()), true);
                     break;
 
                 default:
+                    noFoodItemI.setVisibility(View.GONE);
+                    if (foods.isEmpty()) {
+                        noFoodItemI.setVisibility(View.VISIBLE);
+                    }
                     foodsRV.swapAdapter(new FoodItemRecyclerAdapter(foods, getSupportFragmentManager()), true);
                     break;
             }
@@ -117,6 +141,7 @@ public class SearchResultActivity extends AppCompatActivity {
                 });
             }
             this.foods = foodQuery;
+            promise.resolving(100, null);
             promise.resolved(foodQuery);
         } catch (Exception e) {
             promise.reject("Something went wrong.");
