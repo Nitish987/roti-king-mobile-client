@@ -107,4 +107,7 @@
     <string-array name="payment_method">
         <item>Cash</item>
     </string-array>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="rate_this_food_item">Rate this food item.</string>
 </resources>
