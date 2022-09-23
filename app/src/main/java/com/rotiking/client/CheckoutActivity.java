@@ -47,6 +47,7 @@ public class CheckoutActivity extends AppCompatActivity {
     private int total_cart_price = 0, delivery_price = 0;
     private String name = null, phone = null;
     private double latitude = 0, longitude = 0;
+    private boolean isLocationListenerCalled = true;
 
     private static final int LOCATION_PERMISSION_CODE = 101, COARSE_LOCATION_PERMISSION_CODE = 102;
 
@@ -99,7 +100,6 @@ public class CheckoutActivity extends AppCompatActivity {
 
                 double distance = calculateDistance(geoPoint.getLatitude(), geoPoint.getLongitude());
                 setPayablePrice(distance);
-
 
                 nameTxt.setText(name);
                 phoneTxt.setText(phone);
@@ -165,7 +165,10 @@ public class CheckoutActivity extends AppCompatActivity {
             }
         });
 
-        currentAddressBtn.setOnClickListener(view -> setCurrentLocation());
+        currentAddressBtn.setOnClickListener(view -> {
+            isLocationListenerCalled = true;
+            setCurrentLocation();
+        });
 
         closeBtn.setOnClickListener(view -> finish());
     }
@@ -269,6 +272,7 @@ public class CheckoutActivity extends AppCompatActivity {
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (requestCode == LOCATION_PERMISSION_CODE || requestCode == COARSE_LOCATION_PERMISSION_CODE) {
+            isLocationListenerCalled = true;
             setCurrentLocation();
         }
     }
@@ -277,14 +281,18 @@ public class CheckoutActivity extends AppCompatActivity {
         if (ActivityCompat.checkSelfPermission(CheckoutActivity.this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(CheckoutActivity.this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             LocationManager manager = (LocationManager) getSystemService(LOCATION_SERVICE);
             manager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, location -> {
-                latitude = location.getLatitude();
-                longitude = location.getLongitude();
+                if (isLocationListenerCalled) {
+                    latitude = location.getLatitude();
+                    longitude = location.getLongitude();
 
-                String myAddress = getAddressFromLatLong(location.getLatitude(), location.getLongitude());
-                double distance = calculateDistance(location.getLatitude(), location.getLongitude());
-                setPayablePrice(distance);
+                    String myAddress = getAddressFromLatLong(location.getLatitude(), location.getLongitude());
+                    double distance = calculateDistance(location.getLatitude(), location.getLongitude());
+                    setPayablePrice(distance);
 
-                addressTxt.setText(myAddress);
+                    addressTxt.setText(myAddress);
+
+                    isLocationListenerCalled = false;
+                }
             });
         } else {
             Toast.makeText(CheckoutActivity.this, "Location is required for delivery purpose.", Toast.LENGTH_SHORT).show();
