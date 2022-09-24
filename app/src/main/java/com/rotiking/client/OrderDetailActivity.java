@@ -21,6 +21,7 @@ import com.rotiking.client.common.security.AES128;
 import com.rotiking.client.models.CartItem;
 import com.rotiking.client.models.CheckoutCartItem;
 import com.rotiking.client.models.Order;
+import com.rotiking.client.models.Topping;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -197,11 +198,16 @@ public class OrderDetailActivity extends AppCompatActivity {
     private List<CheckoutCartItem> createOrderItemList(List<CartItem> items) {
         List<CheckoutCartItem> checkoutCartItems = new ArrayList<>();
         for (CartItem cartItem : items) {
-            String orderName = cartItem.getFood_data().getName();
+            StringBuilder orderName = new StringBuilder();
+            orderName.append(cartItem.getFood_data().getName()).append("(").append(cartItem.getQuantity()).append(")");
             if (!cartItem.getTopping_ids().equals("None")) {
-                orderName = orderName + " + Toppings";
+                orderName.append(" + Toppings(");
+                for (Topping topping: cartItem.getToppings()) {
+                    orderName.append(topping.getName()).append(", ");
+                }
+                orderName.replace(orderName.length() - 2, orderName.length(), ")");
             }
-            CheckoutCartItem item = new CheckoutCartItem(orderName, cartItem.getTotal_price());
+            CheckoutCartItem item = new CheckoutCartItem(orderName.toString(), cartItem.getTotal_price());
             checkoutCartItems.add(item);
         }
         return checkoutCartItems;
