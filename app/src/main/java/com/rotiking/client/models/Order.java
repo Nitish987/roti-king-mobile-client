@@ -9,6 +9,7 @@ public class Order implements Serializable {
     private String address;
     private String agentName;
     private String agentPhone;
+    private String agentUid;
     private List<CartItem> items;
     private int deliveryPrice;
     private int discount;
@@ -28,10 +29,11 @@ public class Order implements Serializable {
 
     public Order() {}
 
-    public Order(String address, String agentName, String agentPhone, List<CartItem> items, int deliveryPrice, int discount, GeoPoint location, String name, String orderId, int orderNumber, int orderState, boolean orderSuccess, int payablePrice, String paymentMethod, String phone, String secureNumber, long time, int totalPrice, String uid) {
+    public Order(String address, String agentName, String agentPhone, String agentUid, List<CartItem> items, int deliveryPrice, int discount, GeoPoint location, String name, String orderId, int orderNumber, int orderState, boolean orderSuccess, int payablePrice, String paymentMethod, String phone, String secureNumber, long time, int totalPrice, String uid) {
         this.address = address;
         this.agentName = agentName;
         this.agentPhone = agentPhone;
+        this.agentUid = agentUid;
         this.items = items;
         this.deliveryPrice = deliveryPrice;
         this.discount = discount;
@@ -200,5 +202,13 @@ public class Order implements Serializable {
 
     public void setSecureNumber(String secureNumber) {
         this.secureNumber = secureNumber;
+    }
+
+    public String getAgentUid() {
+        return agentUid;
+    }
+
+    public void setAgentUid(String agentUid) {
+        this.agentUid = agentUid;
     }
 }

@@ -139,6 +139,7 @@ public class CheckoutActivity extends AppCompatActivity {
                         address,
                         null,
                         null,
+                        null,
                         items,
                         delivery_price,
                         totalDiscount,
