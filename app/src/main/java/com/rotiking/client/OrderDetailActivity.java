@@ -22,6 +22,7 @@ import com.rotiking.client.models.CartItem;
 import com.rotiking.client.models.CheckoutCartItem;
 import com.rotiking.client.models.Order;
 import com.rotiking.client.models.Topping;
+import com.rotiking.client.utils.DateParser;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -103,8 +104,7 @@ public class OrderDetailActivity extends AppCompatActivity {
                 String o_ = "#~order~" + order.getOrderNumber();
                 orderNumberTxt.setText(o_);
 
-                Date date = new Date(order.getTime());
-                String t_ = date.toString();
+                String t_ = DateParser.parse(new Date(order.getTime()));
                 timeTxt.setText(t_);
 
                 paymentMethodTxt.setText(order.getPaymentMethod());
@@ -119,12 +119,10 @@ public class OrderDetailActivity extends AppCompatActivity {
                     agentNameTxt.setText(order.getAgentName());
                     agentPhoneTxt.setText(order.getAgentPhone());
 
-                    if (order.getOrderState() > 2) {
-                        deliveryVerificationDesk.setVisibility(View.VISIBLE);
+                    deliveryVerificationDesk.setVisibility(View.VISIBLE);
 
-                        String code = AES128.decrypt(Auth.ENCRYPTION_KEY, order.getSecureNumber());
-                        deliveryCodeTxt.setText(code);
-                    }
+                    String code = AES128.decrypt(Auth.ENCRYPTION_KEY, order.getSecureNumber());
+                    deliveryCodeTxt.setText(code);
                 }
 
                 switch (order.getOrderState()) {

@@ -15,6 +15,7 @@ import com.firebase.ui.firestore.FirestoreRecyclerOptions;
 import com.rotiking.client.OrderDetailActivity;
 import com.rotiking.client.R;
 import com.rotiking.client.models.Order;
+import com.rotiking.client.utils.DateParser;
 
 import java.util.Date;
 
@@ -107,8 +108,7 @@ public class OrderRecyclerAdapter extends FirestoreRecyclerAdapter<Order, OrderR
         }
 
         public void setTime(long time) {
-            Date date = new Date(time);
-            String st = date.toString();
+            String st = DateParser.parse(new Date(time));
             this.time.setText(st);
         }
 
