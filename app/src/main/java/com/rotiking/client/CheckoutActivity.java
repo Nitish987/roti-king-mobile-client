@@ -173,6 +173,21 @@ public class CheckoutActivity extends AppCompatActivity {
         });
 
         closeBtn.setOnClickListener(view -> finish());
+
+        FirebaseFirestore.getInstance().collection("shop").document("state").addSnapshotListener((value, error) -> {
+            if (value != null && value.exists()) {
+                boolean isOpen = value.get("open", Boolean.class);
+                if (isOpen) {
+                    String o_ = "Place Order";
+                    orderBtn.setText(o_);
+                    orderBtn.setEnabled(true);
+                } else {
+                    String o_ = "Order are close for today";
+                    orderBtn.setText(o_);
+                    orderBtn.setEnabled(false);
+                }
+            }
+        });
     }
 
     private void setPayablePrice(double distance) {
