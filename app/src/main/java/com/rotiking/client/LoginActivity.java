@@ -10,6 +10,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.firebase.messaging.FirebaseMessaging;
 import com.rotiking.client.common.auth.Auth;
 import com.rotiking.client.common.auth.AuthPreferences;
 import com.rotiking.client.common.security.AES128;
@@ -77,53 +78,57 @@ public class LoginActivity extends AppCompatActivity {
 
             loginBtn.setVisibility(View.INVISIBLE);
 
-            Auth.Login.login(this, email, password, new Promise<JSONObject>() {
-                @Override
-                public void resolving(int progress, String msg) {
-                    loginProgress.setVisibility(View.VISIBLE);
-                }
+            FirebaseMessaging.getInstance().getToken().addOnSuccessListener(msgToken -> {
+                Auth.Login.login(this, email, password, msgToken, new Promise<JSONObject>() {
+                    @Override
+                    public void resolving(int progress, String msg) {
+                        loginProgress.setVisibility(View.VISIBLE);
+                    }
 
-                @Override
-                public void resolved(JSONObject data) {
-                    try {
-                        String message = data.getString("message");
-                        String fToken = data.getString("fToken");
-                        String token = data.getString("token");
-                        String login = data.getString("login");
-                        String encKey = data.getString("encKey");
+                    @Override
+                    public void resolved(JSONObject data) {
+                        try {
+                            String message = data.getString("message");
+                            String fToken = data.getString("fToken");
+                            String token = data.getString("token");
+                            String login = data.getString("login");
+                            String encKey = data.getString("encKey");
 
-                        encKey = AES128.decrypt(AES128.NATIVE_ENCRYPTION_KEY, encKey);
+                            encKey = AES128.decrypt(AES128.NATIVE_ENCRYPTION_KEY, encKey);
 
-                        String finalEncKey = encKey;
-                        FirebaseAuth.getInstance().signInWithCustomToken(fToken).addOnCompleteListener(task -> {
-                            if (task.isSuccessful()) {
-                                AuthPreferences authPreferences = new AuthPreferences(LoginActivity.this);
-                                authPreferences.setAuthToken(token, login);
-                                authPreferences.setEncryptionKey(finalEncKey);
+                            String finalEncKey = encKey;
+                            FirebaseAuth.getInstance().signInWithCustomToken(fToken).addOnCompleteListener(task -> {
+                                if (task.isSuccessful()) {
+                                    AuthPreferences authPreferences = new AuthPreferences(LoginActivity.this);
+                                    authPreferences.setAuthToken(token, login);
+                                    authPreferences.setEncryptionKey(finalEncKey);
 
-                                Toast.makeText(LoginActivity.this, message, Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(LoginActivity.this, message, Toast.LENGTH_SHORT).show();
 
-                                Intent intent = new Intent(LoginActivity.this, MainActivity.class);
-                                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                                startActivity(intent);
-                                finish();
-                            } else {
-                                Toast.makeText(LoginActivity.this, "Unable to Login.", Toast.LENGTH_LONG).show();
-                                loginBtn.setVisibility(View.VISIBLE);
-                            }
-                        });
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                        Toast.makeText(LoginActivity.this, "something went wrong.", Toast.LENGTH_SHORT).show();
+                                    Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+                                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                                    startActivity(intent);
+                                    finish();
+                                } else {
+                                    Toast.makeText(LoginActivity.this, "Unable to Login.", Toast.LENGTH_LONG).show();
+                                    loginBtn.setVisibility(View.VISIBLE);
+                                }
+                            });
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                            Toast.makeText(LoginActivity.this, "something went wrong.", Toast.LENGTH_SHORT).show();
+                            loginBtn.setVisibility(View.VISIBLE);
+                        }
+                    }
+
+                    @Override
+                    public void reject(String err) {
+                        Toast.makeText(LoginActivity.this, err, Toast.LENGTH_SHORT).show();
                         loginBtn.setVisibility(View.VISIBLE);
                     }
-                }
-
-                @Override
-                public void reject(String err) {
-                    Toast.makeText(LoginActivity.this, err, Toast.LENGTH_SHORT).show();
-                    loginBtn.setVisibility(View.VISIBLE);
-                }
+                });
+            }).addOnFailureListener(e -> {
+                Toast.makeText(LoginActivity.this, "Unable to Login.", Toast.LENGTH_SHORT).show();
             });
         });
 

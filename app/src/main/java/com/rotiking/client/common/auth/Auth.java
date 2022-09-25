@@ -142,7 +142,7 @@ public class Auth {
     }
 
     public static class Login {
-        public static void login(Context context, String email, String password, Promise<JSONObject> promise) {
+        public static void login(Context context, String email, String password, String msgToken, Promise<JSONObject> promise) {
             Map<String, String> headers = new HashMap<>();
             headers.put("RAK", ApiKey.REQUEST_API_KEY);
 
@@ -151,6 +151,7 @@ public class Auth {
                 body.put("email", email);
                 body.put("password", password);
                 body.put("device", Build.MODEL);
+                body.put("msg_token", msgToken);
                 body.put("package", context.getApplicationContext().getPackageName());
             } catch (JSONException e) {
                 promise.reject("unable to Login.");
@@ -167,6 +168,43 @@ public class Auth {
                         @Override
                         public void resolved(JSONObject data) {
                             promise.resolved(data);
+                        }
+
+                        @Override
+                        public void reject(String err) {
+                            promise.reject(err);
+                        }
+                    }
+            );
+        }
+
+        public static void updateMessageToken(Context context, String token, Promise<String> promise) {
+            Map<String, String> headers = new HashMap<>();
+            headers.put("RAK", ApiKey.REQUEST_API_KEY);
+            headers.put("AT", Auth.AUTH_TOKEN);
+            headers.put("LT", Auth.LOGIN_TOKEN);
+
+            JSONObject messageToken = new JSONObject();
+            try {
+                messageToken.put("msg_token", token);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+
+            Server.request(context, Request.Method.POST, ApiKey.REQUEST_API_URL + "account/update-msg-token/", headers, messageToken, new Promise<JSONObject>() {
+                        @Override
+                        public void resolving(int progress, String msg) {
+                            promise.resolving(progress, msg);
+                        }
+
+                        @Override
+                        public void resolved(JSONObject data) {
+                            try {
+                                promise.resolved(data.getString("message"));
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                                promise.reject("Something went wrong.");
+                            }
                         }
 
                         @Override
