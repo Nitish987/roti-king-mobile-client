@@ -9,7 +9,6 @@ import androidx.appcompat.widget.AppCompatImageButton;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -111,6 +110,11 @@ public class FoodDetailBottomSheet extends BottomSheetDialogFragment {
         foodType.setText(food.getFood_type());
         available.setText(food.isAvailable() ? "Available" : "Not Available right now. Come back Later");
 
+        if (!food.isAvailable()) {
+            addToCartBtn.setVisibility(View.INVISIBLE);
+            addToCartBtn.setEnabled(false);
+        }
+
         String rate_ = Double.toString(food.getRating());
         rating.setText(rate_);
 
@@ -161,7 +165,6 @@ public class FoodDetailBottomSheet extends BottomSheetDialogFragment {
 
         addToCartBtn.setOnClickListener(view1 -> {
             List<String> toppingIds = new ArrayList<>(ToppingItemRecyclerAdapter.toppingIds);
-            Log.e("TAG", "onStart: " + toppingIds + " " + food.getFood_id() + " " + quantity);
             Database.addToCart(view1.getContext(), food.getFood_id(), quantity, toppingIds, new Promise<String>() {
                 @Override
                 public void resolving(int progress, String msg) {
