@@ -19,18 +19,27 @@ public class Auth {
     public static String AUTH_TOKEN = "";
     public static String LOGIN_TOKEN = "";
     public static String ENCRYPTION_KEY = "";
+    public static String PAYMENT_KEY = "";
 
     public static boolean isUserAuthenticated(Context context) {
         AuthPreferences preferences = new AuthPreferences(context);
         AUTH_TOKEN = preferences.getAuthToken();
         LOGIN_TOKEN = preferences.getLoginToken();
         ENCRYPTION_KEY = preferences.getEncryptionKey();
+        PAYMENT_KEY = preferences.getPaymentKey();
         return AUTH_TOKEN != null && LOGIN_TOKEN != null && FirebaseAuth.getInstance().getCurrentUser() != null;
     }
 
     public static String getAuthUserUid() {
         if (FirebaseAuth.getInstance().getCurrentUser() != null) {
             return FirebaseAuth.getInstance().getCurrentUser().getUid();
+        }
+        return null;
+    }
+
+    public static String getAuthUserEmail() {
+        if (FirebaseAuth.getInstance().getCurrentUser() != null) {
+            return FirebaseAuth.getInstance().getCurrentUser().getEmail();
         }
         return null;
     }

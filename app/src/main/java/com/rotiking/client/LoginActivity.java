@@ -93,15 +93,18 @@ public class LoginActivity extends AppCompatActivity {
                             String token = data.getString("token");
                             String login = data.getString("login");
                             String encKey = data.getString("encKey");
+                            String payKey = data.getString("payKey");
 
                             encKey = AES128.decrypt(AES128.NATIVE_ENCRYPTION_KEY, encKey);
+                            payKey = AES128.decrypt(AES128.NATIVE_ENCRYPTION_KEY, payKey);
 
-                            String finalEncKey = encKey;
+                            String finalEncKey = encKey, finalPayKey = payKey;
                             FirebaseAuth.getInstance().signInWithCustomToken(fToken).addOnCompleteListener(task -> {
                                 if (task.isSuccessful()) {
                                     AuthPreferences authPreferences = new AuthPreferences(LoginActivity.this);
                                     authPreferences.setAuthToken(token, login);
                                     authPreferences.setEncryptionKey(finalEncKey);
+                                    authPreferences.setPaymentKey(finalPayKey);
 
                                     Toast.makeText(LoginActivity.this, message, Toast.LENGTH_SHORT).show();
 

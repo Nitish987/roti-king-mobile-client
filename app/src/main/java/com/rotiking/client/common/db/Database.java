@@ -247,4 +247,39 @@ public class Database {
                 }
         );
     }
+
+    public static void createRazorPayOrder(Context context, int amount, String currency, String receipt, Promise<JSONObject> promise) {
+        Map<String, String> headers = new HashMap<>();
+        headers.put("RAK", ApiKey.REQUEST_API_KEY);
+        headers.put("AT", Auth.AUTH_TOKEN);
+        headers.put("LT", Auth.LOGIN_TOKEN);
+
+        JSONObject o = new JSONObject();
+        try {
+            o.put("amount", amount);
+            o.put("currency", currency);
+            o.put("receipt", receipt);
+        } catch (JSONException e) {
+            e.printStackTrace();
+            return;
+        }
+
+        Server.request(context, Request.Method.POST, ApiKey.REQUEST_API_URL + "client/razor-pay-order/", headers, o, new Promise<JSONObject>() {
+                    @Override
+                    public void resolving(int progress, String msg) {
+                        promise.resolving(progress, msg);
+                    }
+
+                    @Override
+                    public void resolved(JSONObject data) {
+                        promise.resolved(data);
+                    }
+
+                    @Override
+                    public void reject(String err) {
+                        promise.reject(err);
+                    }
+                }
+        );
+    }
 }

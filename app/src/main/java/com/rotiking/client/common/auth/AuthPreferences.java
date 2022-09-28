@@ -31,6 +31,12 @@ public class AuthPreferences {
         editor.apply();
     }
 
+    public void setPaymentKey(String encKey) {
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putString("PAY_KEY", encKey);
+        editor.apply();
+    }
+
     public String getAuthToken() {
         if (sharedPreferences == null) return null;
         return sharedPreferences.getString(TokenNames.AT, null);
@@ -44,6 +50,11 @@ public class AuthPreferences {
     public String getEncryptionKey() {
         if (sharedPreferences == null) return null;
         return sharedPreferences.getString("ENC_KEY", null);
+    }
+
+    public String getPaymentKey() {
+        if (sharedPreferences == null) return null;
+        return sharedPreferences.getString("PAY_KEY", null);
     }
 
     public void clear() {
