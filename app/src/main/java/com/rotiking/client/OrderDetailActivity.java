@@ -107,7 +107,11 @@ public class OrderDetailActivity extends AppCompatActivity {
                 String t_ = DateParser.parse(new Date(order.getTime()));
                 timeTxt.setText(t_);
 
-                paymentMethodTxt.setText(order.getPaymentMethod());
+                String pm_ = order.getPaymentMethod();
+                if (order.getPaymentOrderID() != null) {
+                    pm_ = pm_ +  " (paid)";
+                }
+                paymentMethodTxt.setText(pm_);
                 nameTxt.setText(order.getName());
                 addressTxt.setText(order.getAddress());
                 phoneTxt.setText(order.getPhone());
