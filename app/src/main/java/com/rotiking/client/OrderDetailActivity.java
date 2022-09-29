@@ -108,7 +108,7 @@ public class OrderDetailActivity extends AppCompatActivity {
                 timeTxt.setText(t_);
 
                 String pm_ = order.getPaymentMethod();
-                if (order.getPaymentOrderID() != null) {
+                if (!order.getPaymentOrderID().equals("None")) {
                     pm_ = pm_ +  " (paid)";
                 }
                 paymentMethodTxt.setText(pm_);

@@ -7,6 +7,7 @@ import com.google.gson.Gson;
 import com.rotiking.client.common.auth.Auth;
 import com.rotiking.client.common.settings.ApiKey;
 import com.rotiking.client.models.Food;
+import com.rotiking.client.models.Order;
 import com.rotiking.client.models.Topping;
 import com.rotiking.client.utils.Promise;
 import com.rotiking.client.utils.Server;
@@ -273,6 +274,50 @@ public class Database {
                     @Override
                     public void resolved(JSONObject data) {
                         promise.resolved(data);
+                    }
+
+                    @Override
+                    public void reject(String err) {
+                        promise.reject(err);
+                    }
+                }
+        );
+    }
+
+    public static void createCustomerOrder(Context context, Order order, String razorpayPaymentId, String razorpayOrderId, String razorpaySignature, Promise<String> promise) {
+        Map<String, String> headers = new HashMap<>();
+        headers.put("RAK", ApiKey.REQUEST_API_KEY);
+        headers.put("AT", Auth.AUTH_TOKEN);
+        headers.put("LT", Auth.LOGIN_TOKEN);
+
+        JSONObject o = new JSONObject();
+        try {
+            Gson gson = new Gson();
+            String order_json = gson.toJson(order);
+
+            o.put("order_json", order_json);
+            o.put("razorpay_payment_id", razorpayPaymentId);
+            o.put("razorpay_order_id", razorpayOrderId);
+            o.put("razorpay_signature", razorpaySignature);
+        } catch (JSONException e) {
+            e.printStackTrace();
+            return;
+        }
+
+        Server.request(context, Request.Method.POST, ApiKey.REQUEST_API_URL + "client/customer-order/", headers, o, new Promise<JSONObject>() {
+                    @Override
+                    public void resolving(int progress, String msg) {
+                        promise.resolving(progress, msg);
+                    }
+
+                    @Override
+                    public void resolved(JSONObject data) {
+                        try {
+                            promise.resolved(data.getString("order_id"));
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                            promise.reject("Something went wrong.");
+                        }
                     }
 
                     @Override

@@ -22,11 +22,12 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.firebase.firestore.DocumentReference;
+import com.google.android.material.progressindicator.CircularProgressIndicator;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.GeoPoint;
 import com.razorpay.Checkout;
-import com.razorpay.PaymentResultListener;
+import com.razorpay.PaymentData;
+import com.razorpay.PaymentResultWithDataListener;
 import com.rotiking.client.adapters.CheckoutCartItemRecyclerAdapter;
 import com.rotiking.client.common.auth.Auth;
 import com.rotiking.client.common.db.Database;
@@ -46,12 +47,13 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 
-public class CheckoutActivity extends AppCompatActivity implements PaymentResultListener {
+public class CheckoutActivity extends AppCompatActivity implements PaymentResultWithDataListener {
     private RecyclerView cartItemRV;
     private ImageButton closeBtn;
     private TextView totalCartPriceTxt, deliveryCartPriceTxt, totalPayableTxt, nameTxt, phoneTxt, addressTxt;
     private AppCompatSpinner paymentMethodSelector;
     private AppCompatButton orderBtn, changeDetailsBtn, currentAddressBtn;
+    private CircularProgressIndicator orderProgress;
 
     private List<CartItem> items;
     private int total_cart_price = 0, delivery_price = 0;
@@ -85,6 +87,7 @@ public class CheckoutActivity extends AppCompatActivity implements PaymentResult
         paymentMethodSelector = findViewById(R.id.payment_method_selector);
         changeDetailsBtn = findViewById(R.id.change_details_btn);
         currentAddressBtn = findViewById(R.id.current_address_btn);
+        orderProgress = findViewById(R.id.order_progress);
 
         cartItemRV = findViewById(R.id.cart_item_rv);
         cartItemRV.setLayoutManager(new LinearLayoutManager(this, RecyclerView.VERTICAL, false));
@@ -103,7 +106,7 @@ public class CheckoutActivity extends AppCompatActivity implements PaymentResult
 
         setPayablePrice(0);
 
-        FirebaseFirestore.getInstance().collection("user").document(Objects.requireNonNull(Auth.getAuthUserUid())).addSnapshotListener((value, error) -> {
+        FirebaseFirestore.getInstance().collection("user").document(Objects.requireNonNull(Auth.getAuthUserUid())).addSnapshotListener(this, (value, error) -> {
             if (value != null && value.exists()) {
                 name = value.get("name", String.class);
                 phone = value.get("phone", String.class);
@@ -198,18 +201,15 @@ public class CheckoutActivity extends AppCompatActivity implements PaymentResult
         totalPayableTxt.setText(tp_);
     }
 
-    private void placeOrder(String paymentOrderID) {
+    private void placeOrder(PaymentData paymentData) {
         int totalDiscount = 0;
         for (CartItem i : items) {
             totalDiscount += i.getFood_data().getDiscount();
         }
 
         GeoPoint point = new GeoPoint(latitude, longitude);
-
-        DocumentReference doc = FirebaseFirestore.getInstance().collection("orders").document();
-        String orderId = doc.getId();
-
         String secureNumber = AES128.encrypt(Auth.ENCRYPTION_KEY, Integer.toString((int) (Math.random() * 10000)));
+        String orderId = FirebaseFirestore.getInstance().collection("orders").document().getId();
 
         Order order = new Order(
                 addressPO,
@@ -221,13 +221,13 @@ public class CheckoutActivity extends AppCompatActivity implements PaymentResult
                 totalDiscount,
                 point,
                 namePO,
-                orderId,
+                "order_" + orderId,
                 orderNumberPO,
                 0,
                 true,
                 payablePricePO,
                 paymentMethodSelector.getSelectedItem().toString(),
-                paymentOrderID,
+                null,
                 phonePO,
                 secureNumber,
                 System.currentTimeMillis(),
@@ -235,12 +235,73 @@ public class CheckoutActivity extends AppCompatActivity implements PaymentResult
                 Auth.getAuthUserUid()
         );
 
-        doc.set(order).addOnSuccessListener(unused -> {
-            Intent intent = new Intent(CheckoutActivity.this, OrderSuccessActivity.class);
-            intent.putExtra("ORDER", orderId);
-            startActivity(intent);
-            finish();
-        }).addOnFailureListener(e -> Toast.makeText(this, "Unable to place order.", Toast.LENGTH_SHORT).show());
+        if (paymentData == null) {
+            Database.createCustomerOrder(
+                    this,
+                    order,
+                    "None",
+                    "None",
+                    "None",
+                    new Promise<String>() {
+                        @Override
+                        public void resolving(int progress, String msg) {
+                            orderProgress.setVisibility(View.VISIBLE);
+                            orderBtn.setVisibility(View.INVISIBLE);
+                        }
+
+                        @Override
+                        public void resolved(String orderId) {
+                            orderProgress.setVisibility(View.INVISIBLE);
+                            orderBtn.setVisibility(View.VISIBLE);
+
+                            Intent intent = new Intent(CheckoutActivity.this, OrderSuccessActivity.class);
+                            intent.putExtra("ORDER", orderId);
+                            startActivity(intent);
+                            finish();
+                        }
+
+                        @Override
+                        public void reject(String err) {
+                            orderProgress.setVisibility(View.INVISIBLE);
+                            orderBtn.setVisibility(View.VISIBLE);
+                            Toast.makeText(CheckoutActivity.this, "Unable to place order.", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+            );
+        } else {
+            Database.createCustomerOrder(
+                    this,
+                    order,
+                    paymentData.getPaymentId(),
+                    paymentData.getOrderId(),
+                    paymentData.getSignature(),
+                    new Promise<String>() {
+                        @Override
+                        public void resolving(int progress, String msg) {
+                            orderProgress.setVisibility(View.VISIBLE);
+                            orderBtn.setVisibility(View.INVISIBLE);
+                        }
+
+                        @Override
+                        public void resolved(String orderId) {
+                            orderProgress.setVisibility(View.INVISIBLE);
+                            orderBtn.setVisibility(View.VISIBLE);
+
+                            Intent intent = new Intent(CheckoutActivity.this, OrderSuccessActivity.class);
+                            intent.putExtra("ORDER", orderId);
+                            startActivity(intent);
+                            finish();
+                        }
+
+                        @Override
+                        public void reject(String err) {
+                            orderProgress.setVisibility(View.INVISIBLE);
+                            orderBtn.setVisibility(View.VISIBLE);
+                            Toast.makeText(CheckoutActivity.this, "Unable to place order.", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+            );
+        }
     }
 
     private void payAndPlaceOrder() {
@@ -300,12 +361,12 @@ public class CheckoutActivity extends AppCompatActivity implements PaymentResult
     }
 
     @Override
-    public void onPaymentSuccess(String s) {
-        placeOrder(s);
+    public void onPaymentSuccess(String s, PaymentData paymentData) {
+        placeOrder(paymentData);
     }
 
     @Override
-    public void onPaymentError(int i, String s) {
+    public void onPaymentError(int i, String s, PaymentData paymentData) {
         Toast.makeText(this, "Payment Failed.", Toast.LENGTH_SHORT).show();
     }
 
