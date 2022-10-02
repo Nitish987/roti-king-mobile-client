@@ -12,8 +12,6 @@ import android.Manifest;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.location.Address;
-import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
@@ -95,6 +93,8 @@ public class CheckoutActivity extends AppCompatActivity implements PaymentResult
 
         if (ActivityCompat.checkSelfPermission(CheckoutActivity.this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_DENIED || ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_DENIED) {
             checkLocationPermission();
+        } else {
+            getCurrentLocation();
         }
     }
 
@@ -112,14 +112,6 @@ public class CheckoutActivity extends AppCompatActivity implements PaymentResult
                 phone = value.get("phone", String.class);
                 String myAddress = value.get("address", String.class);
 
-                GeoPoint geoPoint = getLatLongFromAddress(myAddress);
-                assert geoPoint != null;
-                latitude = geoPoint.getLatitude();
-                longitude = geoPoint.getLongitude();
-
-                double distance = calculateDistance(geoPoint.getLatitude(), geoPoint.getLongitude());
-                setPayablePrice(distance);
-
                 nameTxt.setText(name);
                 phoneTxt.setText(phone);
                 addressTxt.setText(myAddress);
@@ -136,8 +128,8 @@ public class CheckoutActivity extends AppCompatActivity implements PaymentResult
                 phonePO = phoneTxt.getText().toString();
                 addressPO = addressTxt.getText().toString();
 
-                if (name.equals(getString(R.string.no_name)) || phone.equals(getString(R.string.no_phone)) || addressPO.equals(getString(R.string.no_address))) {
-                    AddressBottomSheet.newInstance(nameTxt.getText().toString(), phoneTxt.getText().toString(), addressTxt.getText().toString()).show(getSupportFragmentManager(), "ADDRESS_DIALOG");
+                if (namePO.equals(getString(R.string.no_name)) || phonePO.equals(getString(R.string.no_phone)) || addressPO.equals(getString(R.string.no_address))) {
+                    AddressBottomSheet.newInstance(namePO, phonePO, addressPO).show(getSupportFragmentManager(), "ADDRESS_DIALOG");
                     return;
                 }
 
@@ -153,7 +145,7 @@ public class CheckoutActivity extends AppCompatActivity implements PaymentResult
 
         currentAddressBtn.setOnClickListener(view -> {
             isLocationListenerCalled = true;
-            setCurrentLocation();
+            getCurrentLocation();
         });
 
         closeBtn.setOnClickListener(view -> finish());
@@ -400,42 +392,6 @@ public class CheckoutActivity extends AppCompatActivity implements PaymentResult
         return (double) Math.round(origin.distanceTo(client) * 0.001);
     }
 
-    private GeoPoint getLatLongFromAddress(String strAddress) {
-        Geocoder coder = new Geocoder(this);
-        List<Address> address;
-        GeoPoint p1;
-        try {
-            address = coder.getFromLocationName(strAddress, 5);
-            if (address == null) {
-                return null;
-            }
-            Address location = address.get(0);
-            location.getLatitude();
-            location.getLongitude();
-
-            p1 = new GeoPoint(location.getLatitude(), location.getLongitude());
-
-            return p1;
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
-
-    private String getAddressFromLatLong(Double latitude, Double longitude) {
-        Geocoder geocoder;
-        List<Address> addresses;
-        geocoder = new Geocoder(this, Locale.getDefault());
-
-        try {
-            addresses = geocoder.getFromLocation(latitude, longitude, 1);
-            return addresses.get(0).getAddressLine(0);
-        } catch (IOException e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
-
     private void checkLocationPermission() {
         if (ActivityCompat.checkSelfPermission(CheckoutActivity.this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_DENIED)
             ActivityCompat.requestPermissions(CheckoutActivity.this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, LOCATION_PERMISSION_CODE);
@@ -448,11 +404,11 @@ public class CheckoutActivity extends AppCompatActivity implements PaymentResult
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (requestCode == LOCATION_PERMISSION_CODE || requestCode == COARSE_LOCATION_PERMISSION_CODE) {
             isLocationListenerCalled = true;
-            setCurrentLocation();
+            getCurrentLocation();
         }
     }
 
-    private void setCurrentLocation() {
+    private void getCurrentLocation() {
         if (ActivityCompat.checkSelfPermission(CheckoutActivity.this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(CheckoutActivity.this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             LocationManager manager = (LocationManager) getSystemService(LOCATION_SERVICE);
             manager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, location -> {
@@ -460,11 +416,8 @@ public class CheckoutActivity extends AppCompatActivity implements PaymentResult
                     latitude = location.getLatitude();
                     longitude = location.getLongitude();
 
-                    String myAddress = getAddressFromLatLong(location.getLatitude(), location.getLongitude());
                     double distance = calculateDistance(location.getLatitude(), location.getLongitude());
                     setPayablePrice(distance);
-
-                    addressTxt.setText(myAddress);
 
                     isLocationListenerCalled = false;
                 }
