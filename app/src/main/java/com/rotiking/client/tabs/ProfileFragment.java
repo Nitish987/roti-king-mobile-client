@@ -18,6 +18,7 @@ import android.widget.Toast;
 import com.bumptech.glide.Glide;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.rotiking.client.HelpSupportActivity;
 import com.rotiking.client.MyPhotoActivity;
 import com.rotiking.client.R;
 import com.rotiking.client.common.auth.Auth;
@@ -35,7 +36,7 @@ public class ProfileFragment extends Fragment {
     private ImageView myPhoto;
     private TextView myNameTxt, emailTxt, usernameTxt, nameTxt, addressTxt, phoneTxt;
     private LinearLayout deliveryAddressDesk;
-    private AppCompatButton logoutBtn, changePhotoBtn;
+    private AppCompatButton logoutBtn, changePhotoBtn, helpBtn;
 
     private String name = null, phone = null, address = null;
     private String photo = null;
@@ -59,6 +60,7 @@ public class ProfileFragment extends Fragment {
         deliveryAddressDesk = view.findViewById(R.id.delivery_address_desk);
         changePhotoBtn = view.findViewById(R.id.edit_photo);
         logoutBtn = view.findViewById(R.id.logout);
+        helpBtn = view.findViewById(R.id.help);
 
         return view;
     }
@@ -134,6 +136,11 @@ public class ProfileFragment extends Fragment {
             });
             alert.setNegativeButton("No", (dialogInterface, i) -> dialogInterface.dismiss());
             alert.show();
+        });
+
+        helpBtn.setOnClickListener(view1 -> {
+            Intent intent = new Intent(view.getContext(), HelpSupportActivity.class);
+            startActivity(intent);
         });
     }
 }

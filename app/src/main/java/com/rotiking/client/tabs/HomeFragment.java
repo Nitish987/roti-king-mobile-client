@@ -13,6 +13,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.material.chip.ChipGroup;
@@ -39,6 +40,7 @@ public class HomeFragment extends Fragment {
     private ChipGroup foodFilters;
     private EditText search_eTxt;
     private AppCompatImageButton searchBtn;
+    private TextView license;
 
     private List<Food> foods;
 
@@ -64,6 +66,7 @@ public class HomeFragment extends Fragment {
         foodFilters = view.findViewById(R.id.food_filter);
         search_eTxt = view.findViewById(R.id.search);
         searchBtn = view.findViewById(R.id.search_btn);
+        license = view.findViewById(R.id.license);
 
         return view;
     }
@@ -124,6 +127,11 @@ public class HomeFragment extends Fragment {
             intent.putExtra("SEARCH_QUERY", query);
             intent.putExtra("FOOD_DATA", (Serializable) foods);
             startActivity(intent);
+        });
+
+        FirebaseFirestore.getInstance().collection("app").document("foodLicense").get().addOnSuccessListener(documentSnapshot -> {
+            String foodLicense = documentSnapshot.get("license", String.class);
+            license.setText(foodLicense);
         });
     }
 

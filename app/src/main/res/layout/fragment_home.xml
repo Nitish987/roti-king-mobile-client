@@ -151,6 +151,16 @@
 
         </RelativeLayout>
 
+        <TextView
+            android:id="@+id/license"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:text="@string/licence"
+            android:textColor="@color/red"
+            android:textStyle="italic"
+            android:textSize="20sp"
+            android:layout_marginTop="40dp"/>
+
     </LinearLayout>
 
 </androidx.core.widget.NestedScrollView>

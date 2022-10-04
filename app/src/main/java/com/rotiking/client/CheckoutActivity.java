@@ -58,8 +58,8 @@ public class CheckoutActivity extends AppCompatActivity implements PaymentResult
     private List<CartItem> items;
     private int total_cart_price = 0, delivery_price = 0;
     private String name = null, phone = null;
-    private double latitude = 0, longitude = 0;
-    private boolean isLocationListenerCalled = true, isConvertToAddress = false;
+    private double latitude = 0, longitude = 0, distance = 0;
+    private boolean isLocationListenerCalled = true, isConvertToAddress = false, isOpen = true, isDeliveryFree = false;
 
     private int orderNumberPO, payablePricePO;
     private String namePO, phonePO, addressPO;
@@ -108,7 +108,15 @@ public class CheckoutActivity extends AppCompatActivity implements PaymentResult
         CheckoutCartItemRecyclerAdapter adapter = new CheckoutCartItemRecyclerAdapter(createOrderItemList());
         cartItemRV.setAdapter(adapter);
 
-        setPayablePrice(0);
+        FirebaseFirestore.getInstance().collection("shop").document("state").addSnapshotListener((value, error) -> {
+            if (value != null && value.exists()) {
+                isOpen = value.get("open", Boolean.class);
+                isDeliveryFree = value.get("deliveryFree", Boolean.class);
+                setPayablePrice(distance);
+            }
+        });
+
+        setPayablePrice(distance);
 
         FirebaseFirestore.getInstance().collection("user").document(Objects.requireNonNull(Auth.getAuthUserUid())).addSnapshotListener(this, (value, error) -> {
             if (value != null && value.exists()) {
@@ -154,34 +162,26 @@ public class CheckoutActivity extends AppCompatActivity implements PaymentResult
         });
 
         closeBtn.setOnClickListener(view -> finish());
-
-        FirebaseFirestore.getInstance().collection("shop").document("state").addSnapshotListener((value, error) -> {
-            if (value != null && value.exists()) {
-                boolean isOpen = value.get("open", Boolean.class);
-                if (isOpen) {
-                    String o_ = "Place Order";
-                    orderBtn.setText(o_);
-                    orderBtn.setEnabled(true);
-                } else {
-                    String o_ = "Order are close for today";
-                    orderBtn.setText(o_);
-                    orderBtn.setEnabled(false);
-                }
-            }
-        });
     }
 
     private void setPayablePrice(double distance) {
         orderBtn.setVisibility(View.VISIBLE);
-        orderBtn.setEnabled(true);
 
-        if (distance <= 6) delivery_price = 30;
+        if (isOpen) {
+            String o_ = "Place Order";
+            orderBtn.setText(o_);
+            orderBtn.setEnabled(true);
+        } else {
+            String o_ = "Order are close for today";
+            orderBtn.setText(o_);
+            orderBtn.setEnabled(false);
+        }
+
+        if (isDeliveryFree) delivery_price = 0;
+        else if (distance <= 6) delivery_price = 30;
         else if (distance >= 7 && distance <= 11) delivery_price = 50;
         else if (distance >= 12 && distance <= 20) delivery_price = 70;
         else {
-            orderBtn.setVisibility(View.GONE);
-            orderBtn.setEnabled(false);
-            Toast.makeText(this, "Sorry! we cannot deliver in your range.", Toast.LENGTH_SHORT).show();
             delivery_price = 0;
         }
 
@@ -189,8 +189,17 @@ public class CheckoutActivity extends AppCompatActivity implements PaymentResult
         totalCartPriceTxt.setText(tcp);
 
         String dp_ = "\u20B9 " + delivery_price;
-        if (delivery_price == 0) {
+        if (isDeliveryFree) {
+            dp_ = "Free of Cost";
+            deliveryCartPriceTxt.setTextColor(getColor(R.color.green));
+        }
+
+        if (distance > 20) {
             dp_ = "No Delivery.";
+            deliveryCartPriceTxt.setTextColor(getColor(R.color.red));
+            orderBtn.setVisibility(View.GONE);
+            orderBtn.setEnabled(false);
+            Toast.makeText(this, "Sorry! we cannot deliver in your range.", Toast.LENGTH_SHORT).show();
         }
         deliveryCartPriceTxt.setText(dp_);
 
@@ -435,7 +444,7 @@ public class CheckoutActivity extends AppCompatActivity implements PaymentResult
                     latitude = location.getLatitude();
                     longitude = location.getLongitude();
 
-                    double distance = calculateDistance(location.getLatitude(), location.getLongitude());
+                    distance = calculateDistance(location.getLatitude(), location.getLongitude());
                     setPayablePrice(distance);
 
                     if (isConvertToAddress) {
