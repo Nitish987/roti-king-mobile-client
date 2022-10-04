@@ -12,6 +12,8 @@ import android.Manifest;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.location.Address;
+import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
@@ -57,7 +59,7 @@ public class CheckoutActivity extends AppCompatActivity implements PaymentResult
     private int total_cart_price = 0, delivery_price = 0;
     private String name = null, phone = null;
     private double latitude = 0, longitude = 0;
-    private boolean isLocationListenerCalled = true;
+    private boolean isLocationListenerCalled = true, isConvertToAddress = false;
 
     private int orderNumberPO, payablePricePO;
     private String namePO, phonePO, addressPO;
@@ -101,6 +103,8 @@ public class CheckoutActivity extends AppCompatActivity implements PaymentResult
     @Override
     protected void onStart() {
         super.onStart();
+        nameTxt.setText(Auth.getAuthUserName());
+
         CheckoutCartItemRecyclerAdapter adapter = new CheckoutCartItemRecyclerAdapter(createOrderItemList());
         cartItemRV.setAdapter(adapter);
 
@@ -145,6 +149,7 @@ public class CheckoutActivity extends AppCompatActivity implements PaymentResult
 
         currentAddressBtn.setOnClickListener(view -> {
             isLocationListenerCalled = true;
+            isConvertToAddress = true;
             getCurrentLocation();
         });
 
@@ -205,9 +210,9 @@ public class CheckoutActivity extends AppCompatActivity implements PaymentResult
 
         Order order = new Order(
                 addressPO,
-                null,
-                null,
-                null,
+                "",
+                "",
+                "",
                 items,
                 delivery_price,
                 totalDiscount,
@@ -392,6 +397,20 @@ public class CheckoutActivity extends AppCompatActivity implements PaymentResult
         return (double) Math.round(origin.distanceTo(client) * 0.001);
     }
 
+    private String getAddressFromLatLong(Double latitude, Double longitude) {
+        Geocoder geocoder;
+        List<Address> addresses;
+        geocoder = new Geocoder(this, Locale.getDefault());
+
+        try {
+            addresses = geocoder.getFromLocation(latitude, longitude, 1);
+            return addresses.get(0).getAddressLine(0);
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
     private void checkLocationPermission() {
         if (ActivityCompat.checkSelfPermission(CheckoutActivity.this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_DENIED)
             ActivityCompat.requestPermissions(CheckoutActivity.this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, LOCATION_PERMISSION_CODE);
@@ -418,6 +437,13 @@ public class CheckoutActivity extends AppCompatActivity implements PaymentResult
 
                     double distance = calculateDistance(location.getLatitude(), location.getLongitude());
                     setPayablePrice(distance);
+
+                    if (isConvertToAddress) {
+                        String address = getAddressFromLatLong(latitude, longitude);
+                        addressTxt.setText(address);
+
+                        isConvertToAddress = false;
+                    }
 
                     isLocationListenerCalled = false;
                 }

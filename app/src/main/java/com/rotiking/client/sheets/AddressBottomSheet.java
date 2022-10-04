@@ -4,17 +4,24 @@ import android.os.Bundle;
 
 import androidx.appcompat.widget.AppCompatButton;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
+import com.firebase.ui.firestore.FirestoreRecyclerOptions;
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
 import com.rotiking.client.R;
+import com.rotiking.client.adapters.AddressRecyclerAdapter;
 import com.rotiking.client.common.auth.Auth;
+import com.rotiking.client.models.Address;
 import com.rotiking.client.utils.Validator;
 
 import java.util.HashMap;
@@ -25,6 +32,8 @@ public class AddressBottomSheet extends BottomSheetDialogFragment {
     private View view;
     private EditText name, phone, address;
     private AppCompatButton saveAddressBtn;
+    private RecyclerView addressRV;
+    private TextView savedAddressI;
 
     private String myName = null, myPhone = null, myAddress = null;
 
@@ -56,6 +65,11 @@ public class AddressBottomSheet extends BottomSheetDialogFragment {
         phone = view.findViewById(R.id.phone);
         address = view.findViewById(R.id.address);
         saveAddressBtn = view.findViewById(R.id.save_address);
+        savedAddressI = view.findViewById(R.id.saved_address_i);
+
+        addressRV = view.findViewById(R.id.address_rv);
+        addressRV.setLayoutManager(new LinearLayoutManager(getContext()));
+        addressRV.setHasFixedSize(true);
 
         if (!myName.equals(getString(R.string.no_name))) name.setText(myName);
         if (!myPhone.equals(getString(R.string.no_phone))) phone.setText(myPhone.substring(3));
@@ -67,6 +81,13 @@ public class AddressBottomSheet extends BottomSheetDialogFragment {
     @Override
     public void onStart() {
         super.onStart();
+        Query query = FirebaseFirestore.getInstance().collection("user").document(Objects.requireNonNull(Auth.getAuthUserUid())).collection("addresses");
+        FirestoreRecyclerOptions<Address> options = new FirestoreRecyclerOptions.Builder<Address>().setQuery(query, Address.class).build();
+        AddressRecyclerAdapter adapter = new AddressRecyclerAdapter(options, savedAddressI, o -> dismiss());
+        addressRV.setAdapter(adapter);
+        adapter.startListening();
+
+
         saveAddressBtn.setOnClickListener(view1 -> {
             String name_ = name.getText().toString();
             String phone_ = phone.getText().toString();
@@ -97,7 +118,9 @@ public class AddressBottomSheet extends BottomSheetDialogFragment {
             FirebaseFirestore.getInstance().collection("user").document(Objects.requireNonNull(Auth.getAuthUserUid())).set(map).addOnFailureListener(e -> {
                 Toast.makeText(view.getContext(), "Something went wrong!", Toast.LENGTH_SHORT).show();
             }).addOnSuccessListener(unused -> {
-                dismiss();
+                FirebaseFirestore.getInstance().collection("user").document(Auth.getAuthUserUid()).collection("addresses").document().set(map).addOnFailureListener(e1 -> {
+                    Toast.makeText(view.getContext(), "Something went wrong!", Toast.LENGTH_SHORT).show();
+                }).addOnSuccessListener(unused1 -> dismiss());
             });
         });
     }

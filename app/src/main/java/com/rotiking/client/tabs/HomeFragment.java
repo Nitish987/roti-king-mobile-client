@@ -17,15 +17,14 @@ import android.widget.Toast;
 
 import com.google.android.material.chip.ChipGroup;
 import com.google.android.material.progressindicator.CircularProgressIndicator;
+import com.google.firebase.firestore.FirebaseFirestore;
 import com.rotiking.client.R;
 import com.rotiking.client.SearchResultActivity;
 import com.rotiking.client.adapters.FoodCardRecyclerAdapter;
 import com.rotiking.client.adapters.FoodItemRecyclerAdapter;
-import com.rotiking.client.common.db.Database;
 import com.rotiking.client.models.Food;
 import com.rotiking.client.models.Topping;
 import com.rotiking.client.sheets.FoodDetailBottomSheet;
-import com.rotiking.client.utils.Promise;
 import com.rotiking.client.utils.Validator;
 
 import java.io.Serializable;
@@ -73,34 +72,20 @@ public class HomeFragment extends Fragment {
     @Override
     public void onStart() {
         super.onStart();
-        Database.getFoodItems(view.getContext(), new Promise<List<Food>>() {
-            @Override
-            public void resolving(int progress, String msg) {
-                foodCardProgress.setVisibility(View.VISIBLE);
-                foodItemProgress.setVisibility(View.VISIBLE);
-                foodFilters.setEnabled(false);
-            }
+        FirebaseFirestore.getInstance().collection("foods").get().addOnSuccessListener(requireActivity(), queryDocumentSnapshots -> {
+            foods = queryDocumentSnapshots.toObjects(Food.class);
 
-            @Override
-            public void resolved(List<Food> foods_) {
-                foods = foods_;
-                foodCardProgress.setVisibility(View.GONE);
-                foodItemProgress.setVisibility(View.GONE);
-                foodFilters.setEnabled(true);
+            foodCardProgress.setVisibility(View.GONE);
+            foodItemProgress.setVisibility(View.GONE);
+            foodFilters.setEnabled(true);
 
-                FoodCardRecyclerAdapter cardAdapter = new FoodCardRecyclerAdapter(foods, getParentFragmentManager());
-                foodsCardRV.setAdapter(cardAdapter);
+            FoodCardRecyclerAdapter cardAdapter = new FoodCardRecyclerAdapter(foods, getChildFragmentManager());
+            foodsCardRV.setAdapter(cardAdapter);
 
-                List<Food> foodItems = performTop10FoodQuery();
-                FoodItemRecyclerAdapter itemAdapter = new FoodItemRecyclerAdapter(foodItems, getParentFragmentManager());
-                foodsRV.setAdapter(itemAdapter);
-            }
-
-            @Override
-            public void reject(String err) {
-                Toast.makeText(view.getContext(), err, Toast.LENGTH_SHORT).show();
-            }
-        });
+            List<Food> foodItems = performTop10FoodQuery();
+            FoodItemRecyclerAdapter itemAdapter = new FoodItemRecyclerAdapter(foodItems, getChildFragmentManager());
+            foodsRV.setAdapter(itemAdapter);
+        }).addOnFailureListener(e -> Toast.makeText(view.getContext(), "Unable to load Item.", Toast.LENGTH_SHORT).show());
 
         foodFilters.setOnCheckedStateChangeListener((group, checkedIds) -> {
             switch (group.getCheckedChipId()) {
@@ -125,21 +110,7 @@ public class HomeFragment extends Fragment {
             }
         });
 
-        Database.getToppingItems(view.getContext(), new Promise<List<Topping>>() {
-            @Override
-            public void resolving(int progress, String msg) {
-            }
-
-            @Override
-            public void resolved(List<Topping> toppings) {
-                FoodDetailBottomSheet.TOPPINGS = toppings;
-            }
-
-            @Override
-            public void reject(String err) {
-                Toast.makeText(view.getContext(), err, Toast.LENGTH_SHORT).show();
-            }
-        });
+        FirebaseFirestore.getInstance().collection("toppings").get().addOnSuccessListener(requireActivity(), queryDocumentSnapshots -> FoodDetailBottomSheet.TOPPINGS = queryDocumentSnapshots.toObjects(Topping.class)).addOnFailureListener(e -> Toast.makeText(view.getContext(), "Unable to load Item.", Toast.LENGTH_SHORT).show());
 
         searchBtn.setOnClickListener(view1 -> {
             String query = search_eTxt.getText().toString();

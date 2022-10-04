@@ -19,16 +19,20 @@ import android.widget.Toast;
 import com.bumptech.glide.Glide;
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 import com.google.android.material.progressindicator.CircularProgressIndicator;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.FirebaseFirestore;
 import com.rotiking.client.CartActivity;
 import com.rotiking.client.R;
 import com.rotiking.client.adapters.ToppingItemRecyclerAdapter;
-import com.rotiking.client.common.db.Database;
+import com.rotiking.client.common.auth.Auth;
+import com.rotiking.client.models.CartItem;
 import com.rotiking.client.models.Food;
 import com.rotiking.client.models.Topping;
-import com.rotiking.client.utils.Promise;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 public class FoodDetailBottomSheet extends BottomSheetDialogFragment {
     private View view;
@@ -164,27 +168,32 @@ public class FoodDetailBottomSheet extends BottomSheetDialogFragment {
         });
 
         addToCartBtn.setOnClickListener(view1 -> {
+            addToCartBtn.setVisibility(View.INVISIBLE);
+            addToCartProgress.setVisibility(View.VISIBLE);
+
             List<String> toppingIds = new ArrayList<>(ToppingItemRecyclerAdapter.toppingIds);
-            Database.addToCart(view1.getContext(), food.getFood_id(), quantity, toppingIds, new Promise<String>() {
-                @Override
-                public void resolving(int progress, String msg) {
-                    addToCartBtn.setVisibility(View.INVISIBLE);
-                    addToCartProgress.setVisibility(View.VISIBLE);
-                }
+            List<Topping> selectedToppings = TOPPINGS.stream().filter(topping -> toppingIds.contains(topping.getTopping_id())).collect(Collectors.toList());
+            DocumentReference reference = FirebaseFirestore.getInstance().collection("user").document(Objects.requireNonNull(Auth.getAuthUserUid())).collection("cart").document();
 
-                @Override
-                public void resolved(String message) {
-                    addToCartBtn.setVisibility(View.VISIBLE);
-                    addToCartProgress.setVisibility(View.GONE);
-                    Toast.makeText(view.getContext(), message, Toast.LENGTH_SHORT).show();
-                }
+            CartItem item = new CartItem();
+            item.setFood_data(food);
+            item.setFood_id(food.getFood_id());
+            item.setFood_price(quantity * one_piece_price);
+            item.setItem_id(reference.getId());
+            item.setQuantity(quantity);
+            item.setTopping_ids(toppingIds.isEmpty() ? "None" : String.join(",", toppingIds));
+            item.setTopping_price(topping_price);
+            item.setToppings(selectedToppings);
+            item.setTotal_price((quantity * one_piece_price) + topping_price);
 
-                @Override
-                public void reject(String err) {
-                    addToCartBtn.setVisibility(View.VISIBLE);
-                    addToCartProgress.setVisibility(View.GONE);
-                    Toast.makeText(view.getContext(), err, Toast.LENGTH_SHORT).show();
-                }
+            reference.set(item).addOnSuccessListener(unused -> {
+                addToCartBtn.setVisibility(View.VISIBLE);
+                addToCartProgress.setVisibility(View.GONE);
+                Toast.makeText(view.getContext(), "Item added.", Toast.LENGTH_SHORT).show();
+            }).addOnFailureListener(e -> {
+                addToCartBtn.setVisibility(View.VISIBLE);
+                addToCartProgress.setVisibility(View.GONE);
+                Toast.makeText(view.getContext(), "unable to add.", Toast.LENGTH_SHORT).show();
             });
         });
 

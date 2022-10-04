@@ -44,6 +44,20 @@ public class Auth {
         return null;
     }
 
+    public static String getAuthUserName() {
+        if (FirebaseAuth.getInstance().getCurrentUser() != null) {
+            return FirebaseAuth.getInstance().getCurrentUser().getDisplayName();
+        }
+        return null;
+    }
+
+    public static String getAuthUserPhone() {
+        if (FirebaseAuth.getInstance().getCurrentUser() != null) {
+            return FirebaseAuth.getInstance().getCurrentUser().getPhoneNumber();
+        }
+        return null;
+    }
+
     public static void setAuthStateListener(FirebaseAuth.AuthStateListener listener) {
         FirebaseAuth.getInstance().addAuthStateListener(listener);
     }

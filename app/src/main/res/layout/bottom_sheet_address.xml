@@ -1,87 +1,122 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     tools:context=".sheets.AddressBottomSheet"
-    android:orientation="vertical"
     android:padding="10dp">
 
-    <TextView
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/your_delivery_details"
-        android:textSize="17sp"
-        style="@style/Text"/>
+        android:layout_height="match_parent"
+        android:orientation="vertical">
 
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/full_name"
-        style="@style/Text"
-        android:layout_marginTop="10dp"/>
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/your_delivery_details"
+            android:textSize="17sp"
+            style="@style/Text"
+            android:textColor="@color/red"/>
 
-    <EditText
-        android:id="@+id/name"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="@string/full_name"
-        android:padding="10dp"
-        android:gravity="top"
-        android:inputType="textPersonName"
-        android:background="@drawable/border_block"
-        android:layout_marginTop="5dp"/>
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
 
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/phone_no"
-        style="@style/Text"
-        android:layout_marginTop="10dp"/>
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/address_rv"
+                android:layout_width="match_parent"
+                android:layout_height="210dp" />
 
-    <EditText
-        android:id="@+id/phone"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="@string/phone_no"
-        android:padding="10dp"
-        android:gravity="top"
-        android:inputType="phone"
-        android:background="@drawable/border_block"
-        android:layout_marginTop="5dp"/>
+            <TextView
+                android:id="@+id/saved_address_i"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:text="@string/no_address_saved" />
 
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:textSize="11sp"
-        android:text="@string/don_t_add_91_in_front_of_the_number"
-        android:paddingHorizontal="10dp"/>
+        </RelativeLayout>
 
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/your_address"
-        style="@style/Text"
-        android:layout_marginTop="10dp"/>
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/add_new_delivery_details"
+            android:textSize="15sp"
+            style="@style/Text"
+            android:layout_marginTop="10dp"/>
 
-    <EditText
-        android:id="@+id/address"
-        android:layout_width="match_parent"
-        android:layout_height="70dp"
-        android:hint="@string/enter_your_address"
-        android:padding="10dp"
-        android:gravity="top"
-        android:lines="2"
-        android:background="@drawable/border_block"
-        android:layout_marginTop="5dp"/>
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/full_name"
+            style="@style/Text"
+            android:layout_marginTop="10dp"/>
 
-    <androidx.appcompat.widget.AppCompatButton
-        android:id="@+id/save_address"
-        style="@style/Button"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="10sp"
-        android:layout_marginBottom="20sp"
-        android:text="@string/save" />
+        <EditText
+            android:id="@+id/name"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/full_name"
+            android:padding="10dp"
+            android:gravity="top"
+            android:inputType="textPersonName"
+            android:background="@drawable/border_block"
+            android:layout_marginTop="5dp"
+            android:autofillHints="name" />
 
-</LinearLayout>
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/your_address"
+            style="@style/Text"
+            android:layout_marginTop="10dp"/>
+
+        <EditText
+            android:id="@+id/address"
+            android:layout_width="match_parent"
+            android:layout_height="70dp"
+            android:hint="@string/enter_your_address"
+            android:padding="10dp"
+            android:gravity="top"
+            android:lines="2"
+            android:background="@drawable/border_block"
+            android:layout_marginTop="5dp"/>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/phone_no"
+            style="@style/Text"
+            android:layout_marginTop="10dp"/>
+
+        <EditText
+            android:id="@+id/phone"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/phone_no"
+            android:padding="10dp"
+            android:gravity="top"
+            android:inputType="phone"
+            android:background="@drawable/border_block"
+            android:layout_marginTop="5dp"
+            android:autofillHints="phone"/>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="11sp"
+            android:text="@string/don_t_add_91_in_front_of_the_number"
+            android:paddingHorizontal="10dp"/>
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/save_address"
+            style="@style/Button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20sp"
+            android:layout_marginBottom="20sp"
+            android:text="@string/save" />
+
+    </LinearLayout>
+
+</androidx.core.widget.NestedScrollView>

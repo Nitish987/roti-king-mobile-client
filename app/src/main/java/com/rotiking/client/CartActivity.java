@@ -14,19 +14,15 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.material.progressindicator.CircularProgressIndicator;
-import com.google.gson.Gson;
+import com.google.firebase.firestore.FirebaseFirestore;
 import com.rotiking.client.adapters.CartItemRecyclerAdapter;
-import com.rotiking.client.common.db.Database;
+import com.rotiking.client.common.auth.Auth;
 import com.rotiking.client.models.CartItem;
-import com.rotiking.client.utils.Promise;
-
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 public class CartActivity extends AppCompatActivity {
     private RecyclerView cartItemRV;
@@ -58,46 +54,32 @@ public class CartActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
-        closeBtn.setOnClickListener(view -> finish());
+        cartItemProgress.setVisibility(View.VISIBLE);
+        FirebaseFirestore.getInstance().collection("user").document(Objects.requireNonNull(Auth.getAuthUserUid())).collection("cart").get().addOnSuccessListener(queryDocumentSnapshots -> {
+            cartItemProgress.setVisibility(View.GONE);
 
-        Database.getCartItems(this, new Promise<JSONObject>() {
-            @Override
-            public void resolving(int progress, String msg) {
-                cartItemProgress.setVisibility(View.VISIBLE);
+            cartItems = queryDocumentSnapshots.toObjects(CartItem.class);
+
+            if (cartItems.isEmpty()) {
+                emptyCartI.setVisibility(View.VISIBLE);
             }
 
-            @Override
-            public void resolved(JSONObject data) {
-                cartItemProgress.setVisibility(View.GONE);
-                try {
-                    Gson gson = new Gson();
-                    cartItems = Arrays.asList(gson.fromJson(data.getJSONArray("cart").toString(), CartItem[].class));
-
-                    if (cartItems.isEmpty()) {
-                        emptyCartI.setVisibility(View.VISIBLE);
-                    }
-
-                    total_cart_price = data.getInt("total_cart_price");
-
-                    String pri_ = "\u20B9 " + total_cart_price;
-                    totalCartPriceTxt.setText(pri_);
-
-                    CartItemRecyclerAdapter adapter = new CartItemRecyclerAdapter(cartItems, total_cart_price, o1 -> {
-                        total_cart_price = (int) o1[0];
-                        String newPrice = "\u20B9 " + total_cart_price;
-                        totalCartPriceTxt.setText(newPrice);
-                    });
-                    cartItemRV.setAdapter(adapter);
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
+            for (CartItem item: cartItems) {
+                total_cart_price += item.getTotal_price();
             }
 
-            @Override
-            public void reject(String err) {
-                cartItemProgress.setVisibility(View.GONE);
-                Toast.makeText(CartActivity.this, err, Toast.LENGTH_SHORT).show();
-            }
+            String pri_ = "\u20B9 " + total_cart_price;
+            totalCartPriceTxt.setText(pri_);
+
+            CartItemRecyclerAdapter adapter = new CartItemRecyclerAdapter(cartItems, total_cart_price, o1 -> {
+                total_cart_price = (int) o1[0];
+                String newPrice = "\u20B9 " + total_cart_price;
+                totalCartPriceTxt.setText(newPrice);
+            });
+            cartItemRV.setAdapter(adapter);
+        }).addOnFailureListener(e -> {
+            cartItemProgress.setVisibility(View.GONE);
+            Toast.makeText(CartActivity.this, "unable to load cart.", Toast.LENGTH_SHORT).show();
         });
 
         checkoutBtn.setOnClickListener(view -> {
@@ -117,5 +99,7 @@ public class CartActivity extends AppCompatActivity {
                 finish();
             }
         });
+
+        closeBtn.setOnClickListener(view -> finish());
     }
 }

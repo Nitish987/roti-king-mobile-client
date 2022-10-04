@@ -17,18 +17,18 @@ import com.google.android.material.progressindicator.LinearProgressIndicator;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.rotiking.client.adapters.CheckoutCartItemRecyclerAdapter;
 import com.rotiking.client.common.auth.Auth;
+import com.rotiking.client.common.db.Database;
 import com.rotiking.client.common.security.AES128;
 import com.rotiking.client.models.CartItem;
 import com.rotiking.client.models.CheckoutCartItem;
 import com.rotiking.client.models.Order;
 import com.rotiking.client.models.Topping;
 import com.rotiking.client.utils.DateParser;
+import com.rotiking.client.utils.Promise;
 
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class OrderDetailActivity extends AppCompatActivity {
     private RecyclerView orderItemRV;
@@ -184,11 +184,20 @@ public class OrderDetailActivity extends AppCompatActivity {
             alert.setMessage("Are you sure, you want to cancel your order.");
             alert.setCancelable(true);
             alert.setPositiveButton("Yes", (dialogInterface, i) -> {
-                Map<String, Object> map = new HashMap<>();
-                map.put("orderSuccess", false);
-                FirebaseFirestore.getInstance().collection("orders").document(orderId).update(map)
-                        .addOnSuccessListener(unused -> Toast.makeText(this, "Your Order was canceled.", Toast.LENGTH_SHORT).show())
-                        .addOnFailureListener(e -> Toast.makeText(this, "Unable to cancel Order.", Toast.LENGTH_SHORT).show());
+                Database.cancelCustomerOrder(this, orderId, new Promise<String>() {
+                    @Override
+                    public void resolving(int progress, String msg) {}
+
+                    @Override
+                    public void resolved(String o) {
+                        Toast.makeText(OrderDetailActivity.this, o, Toast.LENGTH_SHORT).show();
+                    }
+
+                    @Override
+                    public void reject(String err) {
+                        Toast.makeText(OrderDetailActivity.this, "Unable to cancel Order.", Toast.LENGTH_SHORT).show();
+                    }
+                });
             });
             alert.setNegativeButton("No", (dialogInterface, i) -> dialogInterface.dismiss());
             alert.show();

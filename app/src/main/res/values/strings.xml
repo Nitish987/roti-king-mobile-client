@@ -108,7 +108,7 @@
         <item>Cash</item>
         <item>Pay Online</item>
     </string-array>
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="rate_this_food_item">Rate this food item.</string>
+    <string name="add_new_delivery_details">Add New Delivery Details</string>
+    <string name="no_address_saved">No address saved.</string>
 </resources>

@@ -8,8 +8,13 @@ import android.os.Bundle;
 import android.widget.ImageButton;
 import android.widget.Toast;
 
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.rotiking.client.common.auth.Auth;
 import com.rotiking.client.common.db.Database;
 import com.rotiking.client.utils.Promise;
+
+import java.util.Objects;
 
 public class OrderSuccessActivity extends AppCompatActivity {
     private AppCompatButton viewOrderDetailsBtn;
@@ -27,17 +32,10 @@ public class OrderSuccessActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
-        Thread thread = new Thread(() -> Database.clearCartItems(this, new Promise<String>() {
-            @Override
-            public void resolving(int progress, String msg) {}
-
-            @Override
-            public void resolved(String o) {
-                Toast.makeText(OrderSuccessActivity.this, "order Placed.", Toast.LENGTH_SHORT).show();
+        Thread thread = new Thread(() -> FirebaseFirestore.getInstance().collection("user").document(Objects.requireNonNull(Auth.getAuthUserUid())).collection("cart").get().addOnSuccessListener(queryDocumentSnapshots -> {
+            for (DocumentSnapshot snapshot: queryDocumentSnapshots) {
+                FirebaseFirestore.getInstance().collection("user").document(Auth.getAuthUserUid()).collection("cart").document(snapshot.getId()).delete();
             }
-
-            @Override
-            public void reject(String err) {}
         }));
         thread.start();
 
