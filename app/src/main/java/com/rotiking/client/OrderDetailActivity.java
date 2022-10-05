@@ -151,6 +151,9 @@ public class OrderDetailActivity extends AppCompatActivity {
                         cookingState.getBackground().setTint(getColor(R.color.red));
                         dispatchedState.getBackground().setTint(getColor(R.color.red));
                         onWayState.getBackground().setTint(getColor(R.color.red));
+
+                        cancelOrderBtn.setVisibility(View.INVISIBLE);
+                        cancelOrderBtn.setEnabled(false);
                         break;
                     case 4:
                         orderStateIndicator.setProgressCompat(100, true);
@@ -159,8 +162,10 @@ public class OrderDetailActivity extends AppCompatActivity {
                         dispatchedState.getBackground().setTint(getColor(R.color.red));
                         onWayState.getBackground().setTint(getColor(R.color.red));
                         deliveredState.getBackground().setTint(getColor(R.color.red));
+
                         deliveryAgentDesk.setVisibility(View.GONE);
                         deliveryVerificationDesk.setVisibility(View.GONE);
+
                         cancelOrderBtn.setVisibility(View.INVISIBLE);
                         cancelOrderBtn.setEnabled(false);
                         break;
