@@ -69,6 +69,7 @@ public class HelpSupportActivity extends AppCompatActivity {
             map.put("time", System.currentTimeMillis());
             map.put("by", Auth.isUserAuthenticated(this)? Auth.getAuthUserUid() : "");
             map.put("help_id", ref.getId());
+            map.put("read", false);
 
             ref.set(map).addOnSuccessListener(unused -> {
                 Toast.makeText(this, "Message sent Successfully.", Toast.LENGTH_SHORT).show();
