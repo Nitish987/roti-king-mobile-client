@@ -199,6 +199,11 @@ public class CheckoutActivity extends AppCompatActivity implements PaymentResult
 
         String tp_ = "\u20B9 " + (total_cart_price + delivery_price);
         totalPayableTxt.setText(tp_);
+
+        if (distance == 0) {
+            orderBtn.setVisibility(View.INVISIBLE);
+            orderBtn.setEnabled(false);
+        }
     }
 
     private void placeOrder(PaymentData paymentData) {
@@ -417,7 +422,10 @@ public class CheckoutActivity extends AppCompatActivity implements PaymentResult
 
     private void getCurrentLocation() {
         if (ActivityCompat.checkSelfPermission(CheckoutActivity.this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(CheckoutActivity.this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-            locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 1000, 10, this);
+            if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER))
+                locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 10, this);
+            else
+                locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 1000, 10, this);
         } else {
             Toast.makeText(CheckoutActivity.this, "Location is required for delivery purpose.", Toast.LENGTH_SHORT).show();
         }
@@ -430,5 +438,11 @@ public class CheckoutActivity extends AppCompatActivity implements PaymentResult
 
         distance = calculateDistance(location.getLatitude(), location.getLongitude());
         setPayablePrice(distance);
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        locationManager.removeUpdates(this);
     }
 }
