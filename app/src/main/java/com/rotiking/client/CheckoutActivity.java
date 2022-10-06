@@ -10,11 +10,11 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.Manifest;
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.location.Address;
-import android.location.Geocoder;
 import android.location.Location;
+import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.view.View;
@@ -41,25 +41,25 @@ import com.rotiking.client.utils.Promise;
 
 import org.json.JSONObject;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 import java.util.Objects;
 
-public class CheckoutActivity extends AppCompatActivity implements PaymentResultWithDataListener {
+public class CheckoutActivity extends AppCompatActivity implements PaymentResultWithDataListener, LocationListener {
     private RecyclerView cartItemRV;
     private ImageButton closeBtn;
     private TextView totalCartPriceTxt, deliveryCartPriceTxt, totalPayableTxt, nameTxt, phoneTxt, addressTxt;
     private AppCompatSpinner paymentMethodSelector;
-    private AppCompatButton orderBtn, changeDetailsBtn, currentAddressBtn;
+    private AppCompatButton orderBtn, changeDetailsBtn;
     private CircularProgressIndicator orderProgress;
+
+    private LocationManager locationManager;
 
     private List<CartItem> items;
     private int total_cart_price = 0, delivery_price = 0;
     private String name = null, phone = null;
     private double latitude = 0, longitude = 0, distance = 0;
-    private boolean isLocationListenerCalled = true, isConvertToAddress = false, isOpen = true, isDeliveryFree = false;
+    private boolean isOpen = true, isDeliveryFree = false;
 
     private int orderNumberPO, payablePricePO;
     private String namePO, phonePO, addressPO;
@@ -86,13 +86,13 @@ public class CheckoutActivity extends AppCompatActivity implements PaymentResult
         addressTxt = findViewById(R.id.address);
         paymentMethodSelector = findViewById(R.id.payment_method_selector);
         changeDetailsBtn = findViewById(R.id.change_details_btn);
-        currentAddressBtn = findViewById(R.id.current_address_btn);
         orderProgress = findViewById(R.id.order_progress);
 
         cartItemRV = findViewById(R.id.cart_item_rv);
         cartItemRV.setLayoutManager(new LinearLayoutManager(this, RecyclerView.VERTICAL, false));
         cartItemRV.setHasFixedSize(true);
 
+        locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         if (ActivityCompat.checkSelfPermission(CheckoutActivity.this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_DENIED || ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_DENIED) {
             checkLocationPermission();
         } else {
@@ -153,12 +153,6 @@ public class CheckoutActivity extends AppCompatActivity implements PaymentResult
                     payAndPlaceOrder();
                 }
             }
-        });
-
-        currentAddressBtn.setOnClickListener(view -> {
-            isLocationListenerCalled = true;
-            isConvertToAddress = true;
-            getCurrentLocation();
         });
 
         closeBtn.setOnClickListener(view -> finish());
@@ -406,20 +400,6 @@ public class CheckoutActivity extends AppCompatActivity implements PaymentResult
         return (double) Math.round(origin.distanceTo(client) * 0.001);
     }
 
-    private String getAddressFromLatLong(Double latitude, Double longitude) {
-        Geocoder geocoder;
-        List<Address> addresses;
-        geocoder = new Geocoder(this, Locale.getDefault());
-
-        try {
-            addresses = geocoder.getFromLocation(latitude, longitude, 1);
-            return addresses.get(0).getAddressLine(0);
-        } catch (IOException e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
-
     private void checkLocationPermission() {
         if (ActivityCompat.checkSelfPermission(CheckoutActivity.this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_DENIED)
             ActivityCompat.requestPermissions(CheckoutActivity.this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, LOCATION_PERMISSION_CODE);
@@ -431,34 +411,24 @@ public class CheckoutActivity extends AppCompatActivity implements PaymentResult
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (requestCode == LOCATION_PERMISSION_CODE || requestCode == COARSE_LOCATION_PERMISSION_CODE) {
-            isLocationListenerCalled = true;
             getCurrentLocation();
         }
     }
 
     private void getCurrentLocation() {
         if (ActivityCompat.checkSelfPermission(CheckoutActivity.this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(CheckoutActivity.this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-            LocationManager manager = (LocationManager) getSystemService(LOCATION_SERVICE);
-            manager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, location -> {
-                if (isLocationListenerCalled) {
-                    latitude = location.getLatitude();
-                    longitude = location.getLongitude();
-
-                    distance = calculateDistance(location.getLatitude(), location.getLongitude());
-                    setPayablePrice(distance);
-
-                    if (isConvertToAddress) {
-                        String address = getAddressFromLatLong(latitude, longitude);
-                        addressTxt.setText(address);
-
-                        isConvertToAddress = false;
-                    }
-
-                    isLocationListenerCalled = false;
-                }
-            });
+            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1, 0.0f, this);
         } else {
             Toast.makeText(CheckoutActivity.this, "Location is required for delivery purpose.", Toast.LENGTH_SHORT).show();
         }
+    }
+
+    @Override
+    public void onLocationChanged(@NonNull Location location) {
+        latitude = location.getLatitude();
+        longitude = location.getLongitude();
+
+        distance = calculateDistance(location.getLatitude(), location.getLongitude());
+        setPayablePrice(distance);
     }
 }
