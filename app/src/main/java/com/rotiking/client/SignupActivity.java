@@ -99,7 +99,6 @@ public class SignupActivity extends AppCompatActivity {
 
                 @Override
                 public void reject(String err) {
-                    Toast.makeText(SignupActivity.this, err, Toast.LENGTH_SHORT).show();
                     continueBtn.setVisibility(View.VISIBLE);
                 }
             });
