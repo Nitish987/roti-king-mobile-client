@@ -27,15 +27,6 @@ public class Validator {
         if (password.length() > 15 || password.length() <= 8)
             return new Object[]{false, "Password must be less than 20 and more than 8 characters in length."};
 
-        if (!password.matches("(.*[A-Z].*)"))
-            return new Object[]{false, "Password must have at least one uppercase character"};
-
-        if (!password.matches("(.*[a-z].*)"))
-            return new Object[]{false, "Password must have at least one lowercase character"};
-
-        if (!password.matches("(.*[0-9].*)"))
-            return new Object[]{false, "Password must have at least one number"};
-
         if (!password.matches("(.*[@,#,$,%].*$)"))
             return new Object[]{false, "Password must have at least one special character among @,#,$,%"};
 
