@@ -50,7 +50,7 @@ public class MyPhotoActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
-        if (!photo.equals("None")) {
+        if (photo != null) {
             Glide.with(this).load(photo).into(myPhoto);
         }
 

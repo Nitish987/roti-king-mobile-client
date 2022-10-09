@@ -18,10 +18,9 @@ public class AuthPreferences {
         }
     }
 
-    public void setAuthToken(String authToken, String loginToken) {
+    public void setAuthToken(String authToken) {
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putString(TokenNames.AT, authToken);
-        editor.putString(TokenNames.LT, loginToken);
         editor.apply();
     }
 
@@ -40,11 +39,6 @@ public class AuthPreferences {
     public String getAuthToken() {
         if (sharedPreferences == null) return null;
         return sharedPreferences.getString(TokenNames.AT, null);
-    }
-
-    public String getLoginToken() {
-        if (sharedPreferences == null) return null;
-        return sharedPreferences.getString(TokenNames.LT, null);
     }
 
     public String getEncryptionKey() {

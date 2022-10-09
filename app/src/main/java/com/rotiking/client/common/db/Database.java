@@ -3,6 +3,7 @@ package com.rotiking.client.common.db;
 import android.content.Context;
 
 import com.android.volley.Request;
+import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.gson.Gson;
 import com.rotiking.client.common.auth.Auth;
 import com.rotiking.client.common.settings.ApiKey;
@@ -21,11 +22,14 @@ import java.util.List;
 import java.util.Map;
 
 public class Database {
+    public static FirebaseFirestore getInstance() {
+        return FirebaseFirestore.getInstance();
+    }
+
     public static void setRating(Context context, String foodId, double rating, Promise<String> promise) {
         Map<String, String> headers = new HashMap<>();
         headers.put("RAK", ApiKey.REQUEST_API_KEY);
         headers.put("AT", Auth.AUTH_TOKEN);
-        headers.put("LT", Auth.LOGIN_TOKEN);
 
         JSONObject rate = new JSONObject();
         try {
@@ -64,7 +68,6 @@ public class Database {
         Map<String, String> headers = new HashMap<>();
         headers.put("RAK", ApiKey.REQUEST_API_KEY);
         headers.put("AT", Auth.AUTH_TOKEN);
-        headers.put("LT", Auth.LOGIN_TOKEN);
 
         Server.request(context, Request.Method.GET, ApiKey.REQUEST_API_URL + "client/get-food-rating/" + foodId + "/", headers, null, new Promise<JSONObject>() {
                     @Override
@@ -94,7 +97,6 @@ public class Database {
         Map<String, String> headers = new HashMap<>();
         headers.put("RAK", ApiKey.REQUEST_API_KEY);
         headers.put("AT", Auth.AUTH_TOKEN);
-        headers.put("LT", Auth.LOGIN_TOKEN);
 
         JSONObject o = new JSONObject();
         try {
@@ -129,7 +131,6 @@ public class Database {
         Map<String, String> headers = new HashMap<>();
         headers.put("RAK", ApiKey.REQUEST_API_KEY);
         headers.put("AT", Auth.AUTH_TOKEN);
-        headers.put("LT", Auth.LOGIN_TOKEN);
 
         JSONObject o = new JSONObject();
         try {
@@ -173,7 +174,6 @@ public class Database {
         Map<String, String> headers = new HashMap<>();
         headers.put("RAK", ApiKey.REQUEST_API_KEY);
         headers.put("AT", Auth.AUTH_TOKEN);
-        headers.put("LT", Auth.LOGIN_TOKEN);
 
         Server.request(context, Request.Method.DELETE, ApiKey.REQUEST_API_URL + "client/cancel-customer-order/" + orderId + "/", headers, null, new Promise<JSONObject>() {
                     @Override

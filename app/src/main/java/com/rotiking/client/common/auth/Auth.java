@@ -1,9 +1,11 @@
 package com.rotiking.client.common.auth;
 
 import android.content.Context;
+import android.net.Uri;
 import android.os.Build;
 
 import com.android.volley.Request;
+import com.google.firebase.messaging.FirebaseMessaging;
 import com.rotiking.client.common.settings.ApiKey;
 import com.google.firebase.auth.FirebaseAuth;
 import com.rotiking.client.utils.Promise;
@@ -17,17 +19,15 @@ import java.util.Map;
 
 public class Auth {
     public static String AUTH_TOKEN = "";
-    public static String LOGIN_TOKEN = "";
     public static String ENCRYPTION_KEY = "";
     public static String PAYMENT_KEY = "";
 
     public static boolean isUserAuthenticated(Context context) {
         AuthPreferences preferences = new AuthPreferences(context);
         AUTH_TOKEN = preferences.getAuthToken();
-        LOGIN_TOKEN = preferences.getLoginToken();
         ENCRYPTION_KEY = preferences.getEncryptionKey();
         PAYMENT_KEY = preferences.getPaymentKey();
-        return AUTH_TOKEN != null && LOGIN_TOKEN != null && FirebaseAuth.getInstance().getCurrentUser() != null;
+        return AUTH_TOKEN != null && FirebaseAuth.getInstance().getCurrentUser() != null;
     }
 
     public static String getAuthUserUid() {
@@ -51,15 +51,16 @@ public class Auth {
         return null;
     }
 
-    public static String getAuthUserPhone() {
-        if (FirebaseAuth.getInstance().getCurrentUser() != null) {
-            return FirebaseAuth.getInstance().getCurrentUser().getPhoneNumber();
-        }
-        return null;
-    }
-
     public static void setAuthStateListener(FirebaseAuth.AuthStateListener listener) {
         FirebaseAuth.getInstance().addAuthStateListener(listener);
+    }
+
+    public static FirebaseAuth getInstance() {
+        return FirebaseAuth.getInstance();
+    }
+
+    public static FirebaseMessaging getMessaging() {
+        return FirebaseMessaging.getInstance();
     }
 
     public static class Signup {
@@ -165,47 +166,11 @@ public class Auth {
     }
 
     public static class Login {
-        public static void login(Context context, String email, String password, String msgToken, Promise<JSONObject> promise) {
-            Map<String, String> headers = new HashMap<>();
-            headers.put("RAK", ApiKey.REQUEST_API_KEY);
-
-            JSONObject body = new JSONObject();
-            try {
-                body.put("email", email);
-                body.put("password", password);
-                body.put("device", Build.MODEL);
-                body.put("msg_token", msgToken);
-                body.put("package", context.getApplicationContext().getPackageName());
-            } catch (JSONException e) {
-                promise.reject("unable to Login.");
-                e.printStackTrace();
-                return;
-            }
-
-            Server.request(context, Request.Method.POST, ApiKey.REQUEST_API_URL + "account/login/", headers, body, new Promise<JSONObject>() {
-                        @Override
-                        public void resolving(int progress, String msg) {
-                            promise.resolving(progress, msg);
-                        }
-
-                        @Override
-                        public void resolved(JSONObject data) {
-                            promise.resolved(data);
-                        }
-
-                        @Override
-                        public void reject(String err) {
-                            promise.reject(err);
-                        }
-                    }
-            );
-        }
-
         public static void updateMessageToken(Context context, String token, Promise<String> promise) {
             Map<String, String> headers = new HashMap<>();
             headers.put("RAK", ApiKey.REQUEST_API_KEY);
             headers.put("AT", Auth.AUTH_TOKEN);
-            headers.put("LT", Auth.LOGIN_TOKEN);
+            headers.put("UID", Auth.getAuthUserUid());
 
             JSONObject messageToken = new JSONObject();
             try {
@@ -340,36 +305,11 @@ public class Auth {
     }
 
     public static class Account {
-        public static void profile(Context context, Promise<JSONObject> promise) {
-            Map<String, String> headers = new HashMap<>();
-            headers.put("RAK", ApiKey.REQUEST_API_KEY);
-            headers.put("AT", Auth.AUTH_TOKEN);
-            headers.put("LT", Auth.LOGIN_TOKEN);
-
-            Server.request(context, Request.Method.GET, ApiKey.REQUEST_API_URL + "account/profile/", headers, null, new Promise<JSONObject>() {
-                        @Override
-                        public void resolving(int progress, String msg) {
-                            promise.resolving(progress, msg);
-                        }
-
-                        @Override
-                        public void resolved(JSONObject data) {
-                            promise.resolved(data);
-                        }
-
-                        @Override
-                        public void reject(String err) {
-                            promise.reject(err);
-                        }
-                    }
-            );
-        }
-
         public static void setProfilePhoto(Context context, String photo, Promise<String> promise) {
             Map<String, String> headers = new HashMap<>();
             headers.put("RAK", ApiKey.REQUEST_API_KEY);
             headers.put("AT", Auth.AUTH_TOKEN);
-            headers.put("LT", Auth.LOGIN_TOKEN);
+            headers.put("UID", Auth.getAuthUserUid());
 
             JSONObject profile = new JSONObject();
             try {
@@ -408,7 +348,6 @@ public class Auth {
             Map<String, String> headers = new HashMap<>();
             headers.put("RAK", ApiKey.REQUEST_API_KEY);
             headers.put("AT", Auth.AUTH_TOKEN);
-            headers.put("LT", Auth.LOGIN_TOKEN);
 
             JSONObject notification = new JSONObject();
             try {

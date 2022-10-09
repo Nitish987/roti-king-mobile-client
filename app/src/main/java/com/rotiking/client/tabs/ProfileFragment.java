@@ -7,6 +7,7 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.widget.AppCompatButton;
 import androidx.fragment.app.Fragment;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -34,7 +35,7 @@ import java.util.Objects;
 public class ProfileFragment extends Fragment {
     private View view;
     private ImageView myPhoto;
-    private TextView myNameTxt, emailTxt, usernameTxt, nameTxt, addressTxt, phoneTxt;
+    private TextView myNameTxt, emailTxt, nameTxt, addressTxt, phoneTxt;
     private LinearLayout deliveryAddressDesk;
     private AppCompatButton logoutBtn, changePhotoBtn, helpBtn;
 
@@ -53,7 +54,6 @@ public class ProfileFragment extends Fragment {
         myPhoto = view.findViewById(R.id.photo);
         myNameTxt = view.findViewById(R.id.my_name);
         emailTxt = view.findViewById(R.id.email);
-        usernameTxt = view.findViewById(R.id.username);
         nameTxt = view.findViewById(R.id.name);
         phoneTxt = view.findViewById(R.id.phone);
         addressTxt = view.findViewById(R.id.address);
@@ -68,6 +68,16 @@ public class ProfileFragment extends Fragment {
     @Override
     public void onStart() {
         super.onStart();
+        myNameTxt.setText(Auth.getAuthUserName());
+        emailTxt.setText(Auth.getAuthUserEmail());
+
+        FirebaseFirestore.getInstance().collection("user").document(Objects.requireNonNull(Auth.getAuthUserUid())).collection("data").document("profile").get().addOnSuccessListener(documentSnapshot -> {
+            if (!documentSnapshot.get("photo", String.class).equals("")) {
+                photo = documentSnapshot.get("photo", String.class);
+                Glide.with(view.getContext()).load(photo).into(myPhoto);
+            }
+        });
+
         FirebaseFirestore.getInstance().collection("user").document(Objects.requireNonNull(Auth.getAuthUserUid())).addSnapshotListener((value, error) -> {
             if (value != null && value.exists()) {
                 name = value.get("name", String.class);
@@ -77,38 +87,6 @@ public class ProfileFragment extends Fragment {
                 nameTxt.setText(name);
                 phoneTxt.setText(phone);
                 addressTxt.setText(address);
-            }
-        });
-
-        Auth.Account.profile(view.getContext(), new Promise<JSONObject>() {
-            @Override
-            public void resolving(int progress, String msg) {}
-
-            @Override
-            public void resolved(JSONObject data) {
-                try {
-                    JSONObject profile = data.getJSONObject("profile");
-                    String name = profile.getString("name");
-                    String email = profile.getString("email");
-                    String username = profile.getString("username");
-
-                    myNameTxt.setText(name);
-                    emailTxt.setText(email);
-                    usernameTxt.setText(username);
-
-                    photo = profile.getString("photo");
-                    if (!photo.equals("None")) {
-                        Glide.with(view.getContext()).load(photo).into(myPhoto);
-                    }
-
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-            }
-
-            @Override
-            public void reject(String err) {
-                Toast.makeText(view.getContext(), err, Toast.LENGTH_SHORT).show();
             }
         });
 

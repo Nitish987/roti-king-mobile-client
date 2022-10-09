@@ -10,16 +10,15 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.firebase.messaging.FirebaseMessaging;
 import com.rotiking.client.common.auth.Auth;
 import com.rotiking.client.common.auth.AuthPreferences;
+import com.rotiking.client.common.db.Database;
 import com.rotiking.client.common.security.AES128;
 import com.rotiking.client.utils.Promise;
 import com.rotiking.client.utils.Validator;
 import com.google.android.material.progressindicator.CircularProgressIndicator;
-import com.google.firebase.auth.FirebaseAuth;
 
-import org.json.JSONObject;
+import java.util.Objects;
 
 public class LoginActivity extends AppCompatActivity {
     private AppCompatButton loginBtn;
@@ -77,61 +76,36 @@ public class LoginActivity extends AppCompatActivity {
             }
 
             loginBtn.setVisibility(View.INVISIBLE);
+            loginProgress.setVisibility(View.VISIBLE);
 
-            FirebaseMessaging.getInstance().getToken().addOnSuccessListener(msgToken -> {
-                Auth.Login.login(this, email, password, msgToken, new Promise<JSONObject>() {
-                    @Override
-                    public void resolving(int progress, String msg) {
-                        loginProgress.setVisibility(View.VISIBLE);
-                    }
+            Auth.getInstance().signInWithEmailAndPassword(email, password).addOnSuccessListener(authResult -> {
+                loginProgress.setVisibility(View.VISIBLE);
+                Database.getInstance().collection("user").document(Objects.requireNonNull(authResult.getUser()).getUid())
+                        .collection("data").document("profile").get().addOnSuccessListener(documentSnapshot -> {
+                            if (documentSnapshot.exists()) {
+                                String authToken = documentSnapshot.get("authToken", String.class);
+                                String encKey = AES128.decrypt(AES128.NATIVE_ENCRYPTION_KEY, documentSnapshot.get("encKey", String.class));
+                                String payKey = AES128.decrypt(AES128.NATIVE_ENCRYPTION_KEY, documentSnapshot.get("payKey", String.class));
 
-                    @Override
-                    public void resolved(JSONObject data) {
-                        try {
-                            String message = data.getString("message");
-                            String fToken = data.getString("fToken");
-                            String token = data.getString("token");
-                            String login = data.getString("login");
-                            String encKey = data.getString("encKey");
-                            String payKey = data.getString("payKey");
+                                AuthPreferences preferences = new AuthPreferences(this);
+                                preferences.setAuthToken(authToken);
+                                preferences.setEncryptionKey(encKey);
+                                preferences.setPaymentKey(payKey);
 
-                            encKey = AES128.decrypt(AES128.NATIVE_ENCRYPTION_KEY, encKey);
-                            payKey = AES128.decrypt(AES128.NATIVE_ENCRYPTION_KEY, payKey);
+                                loginProgress.setVisibility(View.GONE);
 
-                            String finalEncKey = encKey, finalPayKey = payKey;
-                            FirebaseAuth.getInstance().signInWithCustomToken(fToken).addOnCompleteListener(task -> {
-                                if (task.isSuccessful()) {
-                                    AuthPreferences authPreferences = new AuthPreferences(LoginActivity.this);
-                                    authPreferences.setAuthToken(token, login);
-                                    authPreferences.setEncryptionKey(finalEncKey);
-                                    authPreferences.setPaymentKey(finalPayKey);
-
-                                    Toast.makeText(LoginActivity.this, message, Toast.LENGTH_SHORT).show();
-
-                                    Intent intent = new Intent(LoginActivity.this, MainActivity.class);
-                                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                                    startActivity(intent);
-                                    finish();
-                                } else {
-                                    Toast.makeText(LoginActivity.this, "Unable to Login.", Toast.LENGTH_LONG).show();
-                                    loginBtn.setVisibility(View.VISIBLE);
-                                }
-                            });
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                            Toast.makeText(LoginActivity.this, "something went wrong.", Toast.LENGTH_SHORT).show();
-                            loginBtn.setVisibility(View.VISIBLE);
-                        }
-                    }
-
-                    @Override
-                    public void reject(String err) {
-                        Toast.makeText(LoginActivity.this, err, Toast.LENGTH_SHORT).show();
-                        loginBtn.setVisibility(View.VISIBLE);
-                    }
-                });
+                                Intent intent = new Intent(this, MainActivity.class);
+                                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                                startActivity(intent);
+                                finish();
+                            } else {
+                                Toast.makeText(LoginActivity.this, "Something went wrong.", Toast.LENGTH_SHORT).show();
+                            }
+                        });
             }).addOnFailureListener(e -> {
-                Toast.makeText(LoginActivity.this, "Unable to Login.", Toast.LENGTH_SHORT).show();
+                loginBtn.setVisibility(View.VISIBLE);
+                loginProgress.setVisibility(View.INVISIBLE);
+                Toast.makeText(LoginActivity.this, e.getMessage(), Toast.LENGTH_SHORT).show();
             });
         });
 
@@ -139,5 +113,25 @@ public class LoginActivity extends AppCompatActivity {
             Intent intent = new Intent(this, RecoverPasswordActivity.class);
             startActivity(intent);
         });
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        if (Auth.isUserAuthenticated(this)) {
+            Auth.getMessaging().getToken().addOnSuccessListener(s -> Auth.Login.updateMessageToken(this, s, new Promise<String>() {
+                @Override
+                public void resolving(int progress, String msg) {
+                }
+
+                @Override
+                public void resolved(String o) {
+                }
+
+                @Override
+                public void reject(String err) {
+                }
+            }));
+        }
     }
 }
