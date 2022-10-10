@@ -348,6 +348,7 @@ public class Auth {
             Map<String, String> headers = new HashMap<>();
             headers.put("RAK", ApiKey.REQUEST_API_KEY);
             headers.put("AT", Auth.AUTH_TOKEN);
+            headers.put("UID", Auth.getAuthUserUid());
 
             JSONObject notification = new JSONObject();
             try {

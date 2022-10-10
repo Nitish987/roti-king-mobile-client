@@ -83,6 +83,14 @@ public class LoginActivity extends AppCompatActivity {
                 Database.getInstance().collection("user").document(Objects.requireNonNull(authResult.getUser()).getUid())
                         .collection("data").document("profile").get().addOnSuccessListener(documentSnapshot -> {
                             if (documentSnapshot.exists()) {
+                                if (!documentSnapshot.get("accType", String.class).equals("CLIENT")) {
+                                    Toast.makeText(LoginActivity.this, "You have no Permission to login to this app.", Toast.LENGTH_SHORT).show();
+                                    Auth.getInstance().signOut();
+                                    loginBtn.setVisibility(View.VISIBLE);
+                                    loginProgress.setVisibility(View.INVISIBLE);
+                                    return;
+                                }
+
                                 String authToken = documentSnapshot.get("authToken", String.class);
                                 String encKey = AES128.decrypt(AES128.NATIVE_ENCRYPTION_KEY, documentSnapshot.get("encKey", String.class));
                                 String payKey = AES128.decrypt(AES128.NATIVE_ENCRYPTION_KEY, documentSnapshot.get("payKey", String.class));

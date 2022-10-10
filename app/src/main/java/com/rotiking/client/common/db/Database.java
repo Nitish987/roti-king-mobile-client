@@ -30,6 +30,7 @@ public class Database {
         Map<String, String> headers = new HashMap<>();
         headers.put("RAK", ApiKey.REQUEST_API_KEY);
         headers.put("AT", Auth.AUTH_TOKEN);
+        headers.put("UID", Auth.getAuthUserUid());
 
         JSONObject rate = new JSONObject();
         try {
@@ -68,6 +69,7 @@ public class Database {
         Map<String, String> headers = new HashMap<>();
         headers.put("RAK", ApiKey.REQUEST_API_KEY);
         headers.put("AT", Auth.AUTH_TOKEN);
+        headers.put("UID", Auth.getAuthUserUid());
 
         Server.request(context, Request.Method.GET, ApiKey.REQUEST_API_URL + "client/get-food-rating/" + foodId + "/", headers, null, new Promise<JSONObject>() {
                     @Override
@@ -97,6 +99,7 @@ public class Database {
         Map<String, String> headers = new HashMap<>();
         headers.put("RAK", ApiKey.REQUEST_API_KEY);
         headers.put("AT", Auth.AUTH_TOKEN);
+        headers.put("UID", Auth.getAuthUserUid());
 
         JSONObject o = new JSONObject();
         try {
@@ -131,6 +134,7 @@ public class Database {
         Map<String, String> headers = new HashMap<>();
         headers.put("RAK", ApiKey.REQUEST_API_KEY);
         headers.put("AT", Auth.AUTH_TOKEN);
+        headers.put("UID", Auth.getAuthUserUid());
 
         JSONObject o = new JSONObject();
         try {
@@ -174,6 +178,7 @@ public class Database {
         Map<String, String> headers = new HashMap<>();
         headers.put("RAK", ApiKey.REQUEST_API_KEY);
         headers.put("AT", Auth.AUTH_TOKEN);
+        headers.put("UID", Auth.getAuthUserUid());
 
         Server.request(context, Request.Method.DELETE, ApiKey.REQUEST_API_URL + "client/cancel-customer-order/" + orderId + "/", headers, null, new Promise<JSONObject>() {
                     @Override
