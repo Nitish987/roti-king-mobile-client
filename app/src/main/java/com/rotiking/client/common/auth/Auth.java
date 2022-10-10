@@ -163,6 +163,47 @@ public class Auth {
                     }
             );
         }
+
+        public static void googleSignupCreation(Context context, String token, String uid, String name, String email, Promise<String> promise) {
+            Map<String, String> headers = new HashMap<>();
+            headers.put("RAK", ApiKey.REQUEST_API_KEY);
+            headers.put("SIT", token);
+
+            JSONObject body = new JSONObject();
+            try {
+                body.put("uid", uid);
+                body.put("name", name);
+                body.put("email", email);
+                body.put("package", context.getApplicationContext().getPackageName());
+            } catch (JSONException e) {
+                promise.reject("Unable to signup.");
+                e.printStackTrace();
+                return;
+            }
+
+            Server.request(context, Request.Method.POST, ApiKey.REQUEST_API_URL + "account/g-signup/", headers, body, new Promise<JSONObject>() {
+                        @Override
+                        public void resolving(int progress, String msg) {
+                            promise.resolving(progress, msg);
+                        }
+
+                        @Override
+                        public void resolved(JSONObject data) {
+                            try {
+                                promise.resolved(data.getString("message"));
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                                promise.reject("Something went wrong.");
+                            }
+                        }
+
+                        @Override
+                        public void reject(String err) {
+                            promise.reject(err);
+                        }
+                    }
+            );
+        }
     }
 
     public static class Login {
