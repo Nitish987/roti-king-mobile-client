@@ -20,7 +20,7 @@ import com.rotiking.client.utils.Validator;
 import org.json.JSONObject;
 
 public class RecoverPasswordActivity extends AppCompatActivity {
-    private TextView titleTxt, messageTxt;
+    private TextView titleTxt, messageTxt, resentOtp;
     private LinearLayout emailSection, otpSection, passwordSection, confirmPasswordSection;
     private EditText email_eTxt, otp_eTxt, password_eTxt, confirmPassword_eTxt;
     private AppCompatButton recoverBtn;
@@ -47,6 +47,7 @@ public class RecoverPasswordActivity extends AppCompatActivity {
         confirmPassword_eTxt = findViewById(R.id.confirm_password_e_txt);
         recoverBtn = findViewById(R.id.recovery_btn);
         recoverProgress = findViewById(R.id.recovery_progress);
+        resentOtp = findViewById(R.id.resent_otp);
     }
 
     @Override
@@ -107,6 +108,7 @@ public class RecoverPasswordActivity extends AppCompatActivity {
                             otpSection.setVisibility(View.VISIBLE);
                             recoverProgress.setVisibility(View.INVISIBLE);
                             recoverBtn.setVisibility(View.VISIBLE);
+                            resentOtp.setVisibility(View.VISIBLE);
 
                             recoverBtn.setTag("otp");
 
@@ -162,6 +164,7 @@ public class RecoverPasswordActivity extends AppCompatActivity {
                             confirmPasswordSection.setVisibility(View.VISIBLE);
                             recoverProgress.setVisibility(View.INVISIBLE);
                             recoverBtn.setVisibility(View.VISIBLE);
+                            resentOtp.setVisibility(View.GONE);
 
                             recoverBtn.setTag("password");
 
@@ -237,6 +240,22 @@ public class RecoverPasswordActivity extends AppCompatActivity {
                     }
                 });
             }
+        });
+
+        resentOtp.setOnClickListener(view -> {
+            Toast.makeText(this, "Sending OTP...", Toast.LENGTH_SHORT).show();
+            Auth.Recovery.resentOtpVerification(this, token, new Promise<String>() {
+                @Override
+                public void resolving(int progress, String msg) {}
+
+                @Override
+                public void resolved(String newToken) {
+                    token = newToken;
+                }
+
+                @Override
+                public void reject(String err) {}
+            });
         });
     }
 }

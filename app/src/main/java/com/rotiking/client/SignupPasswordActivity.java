@@ -22,7 +22,7 @@ import org.json.JSONObject;
 
 public class SignupPasswordActivity extends AppCompatActivity {
 
-    private TextView titleTxt, messageTxt;
+    private TextView titleTxt, messageTxt, resentOtp;
     private LinearLayout otpSection, passwordSection, confirmPasswordSection;
     private EditText otp_eTxt, password_eTxt, confirmPassword_eTxt;
     private AppCompatButton signupBtn;
@@ -46,6 +46,7 @@ public class SignupPasswordActivity extends AppCompatActivity {
         confirmPassword_eTxt = findViewById(R.id.confirm_password_e_txt);
         signupBtn = findViewById(R.id.sign_up_btn);
         signupProgress = findViewById(R.id.sign_up_progress);
+        resentOtp = findViewById(R.id.resent_otp);
 
         message = getIntent().getStringExtra("message");
         token = getIntent().getStringExtra("token");
@@ -114,6 +115,7 @@ public class SignupPasswordActivity extends AppCompatActivity {
                             confirmPasswordSection.setVisibility(View.VISIBLE);
                             signupProgress.setVisibility(View.INVISIBLE);
                             signupBtn.setVisibility(View.VISIBLE);
+                            resentOtp.setVisibility(View.GONE);
 
                             signupBtn.setTag("password");
 
@@ -194,6 +196,22 @@ public class SignupPasswordActivity extends AppCompatActivity {
                     }
                 });
             }
+        });
+
+        resentOtp.setOnClickListener(view -> {
+            Toast.makeText(this, "Sending OTP...", Toast.LENGTH_SHORT).show();
+            Auth.Signup.resentOtpVerification(this, token, new Promise<String>() {
+                @Override
+                public void resolving(int progress, String msg) {}
+
+                @Override
+                public void resolved(String newToken) {
+                    token = newToken;
+                }
+
+                @Override
+                public void reject(String err) {}
+            });
         });
     }
 }

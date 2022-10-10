@@ -117,6 +117,7 @@
     <string name="send">Send</string>
     <string name="contact_number">Contact Number</string>
     <string name="licence">Food Licence</string>
+    <string name="resent_otp">Resent OTP</string>
     <string-array name="help_type">
         <item>Simple Discussion</item>
         <item>Order Issue</item>

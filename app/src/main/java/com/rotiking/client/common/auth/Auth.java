@@ -204,6 +204,35 @@ public class Auth {
                     }
             );
         }
+
+        public static void resentOtpVerification(Context context, String token, Promise<String> promise) {
+            Map<String, String> headers = new HashMap<>();
+            headers.put("RAK", ApiKey.REQUEST_API_KEY);
+            headers.put("SOT", token);
+
+            Server.request(context, Request.Method.POST, ApiKey.REQUEST_API_URL + "account/resent-otp/signup-otp/", headers, null, new Promise<JSONObject>() {
+                        @Override
+                        public void resolving(int progress, String msg) {
+                            promise.resolving(progress, msg);
+                        }
+
+                        @Override
+                        public void resolved(JSONObject data) {
+                            try {
+                                promise.resolved(data.getString("token"));
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                                promise.reject("Something went wrong.");
+                            }
+                        }
+
+                        @Override
+                        public void reject(String err) {
+                            promise.reject(err);
+                        }
+                    }
+            );
+        }
     }
 
     public static class Login {
@@ -334,6 +363,35 @@ public class Auth {
                         @Override
                         public void resolved(JSONObject data) {
                             promise.resolved(data);
+                        }
+
+                        @Override
+                        public void reject(String err) {
+                            promise.reject(err);
+                        }
+                    }
+            );
+        }
+
+        public static void resentOtpVerification(Context context, String token, Promise<String> promise) {
+            Map<String, String> headers = new HashMap<>();
+            headers.put("RAK", ApiKey.REQUEST_API_KEY);
+            headers.put("RAOT", token);
+
+            Server.request(context, Request.Method.POST, ApiKey.REQUEST_API_URL + "account/resent-otp/recovery-account-otp/", headers, null, new Promise<JSONObject>() {
+                        @Override
+                        public void resolving(int progress, String msg) {
+                            promise.resolving(progress, msg);
+                        }
+
+                        @Override
+                        public void resolved(JSONObject data) {
+                            try {
+                                promise.resolved(data.getString("token"));
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                                promise.reject("Something went wrong.");
+                            }
                         }
 
                         @Override
