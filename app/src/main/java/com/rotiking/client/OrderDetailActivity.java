@@ -7,6 +7,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
@@ -40,6 +41,8 @@ public class OrderDetailActivity extends AppCompatActivity {
     private LinearLayout deliveryAgentDesk, deliveryVerificationDesk;
 
     private String orderId;
+    private boolean isCountDownEnable = true;
+    private CountDownTimer orderCancellationTimer = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -107,6 +110,26 @@ public class OrderDetailActivity extends AppCompatActivity {
                 String t_ = DateParser.parse(new Date(order.getTime()));
                 timeTxt.setText(t_);
 
+                if (isCountDownEnable) {
+                    isCountDownEnable = false;
+
+                    long fromMillis = 300000 - (System.currentTimeMillis() - order.getTime());
+                    orderCancellationTimer = new CountDownTimer(fromMillis, 1000) {
+                        @Override
+                        public void onTick(long l) {
+                            String cancelOrderBtnTxt = "Cancel Order within " + (l / 1000) + " seconds";
+                            cancelOrderBtn.setText(cancelOrderBtnTxt);
+                        }
+
+                        @Override
+                        public void onFinish() {
+                            cancelOrderBtn.setVisibility(View.INVISIBLE);
+                            cancelOrderBtn.setEnabled(false);
+                        }
+                    };
+                    orderCancellationTimer.start();
+                }
+
                 String pm_ = order.getPaymentMethod();
                 if (!order.getPaymentOrderID().equals("None")) {
                     pm_ = pm_ +  " (paid)";
@@ -151,9 +174,6 @@ public class OrderDetailActivity extends AppCompatActivity {
                         cookingState.getBackground().setTint(getColor(R.color.red));
                         dispatchedState.getBackground().setTint(getColor(R.color.red));
                         onWayState.getBackground().setTint(getColor(R.color.red));
-
-                        cancelOrderBtn.setVisibility(View.INVISIBLE);
-                        cancelOrderBtn.setEnabled(false);
                         break;
                     case 4:
                         orderStateIndicator.setProgressCompat(100, true);
@@ -173,12 +193,19 @@ public class OrderDetailActivity extends AppCompatActivity {
 
                 if (!order.isOrderSuccess()) {
                     orderStateIndicator.setProgressCompat(0, true);
+
                     String cancelMsg = "Your Order was Canceled.";
-                    cancelOrderBtn.setText(cancelMsg);
-                    cancelOrderBtn.setEnabled(false);
                     orderedStateTxt.setText(cancelMsg);
+
+                    cancelOrderBtn.setVisibility(View.INVISIBLE);
+                    cancelOrderBtn.setEnabled(false);
+
                     deliveryAgentDesk.setVisibility(View.GONE);
                     deliveryVerificationDesk.setVisibility(View.GONE);
+
+                    if (orderCancellationTimer != null){
+                        orderCancellationTimer.cancel();
+                    }
                 }
             }
         });
@@ -237,6 +264,14 @@ public class OrderDetailActivity extends AppCompatActivity {
             case 3: return  "On way...";
             case 4: return  "Delivered...";
             default: return "";
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (orderCancellationTimer != null){
+            orderCancellationTimer.cancel();
         }
     }
 }
