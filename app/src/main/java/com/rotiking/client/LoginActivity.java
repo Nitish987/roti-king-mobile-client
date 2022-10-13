@@ -185,6 +185,9 @@ public class LoginActivity extends AppCompatActivity {
         AuthCredential credential = GoogleAuthProvider.getCredential(idToken, null);
         auth.signInWithCredential(credential).addOnCompleteListener(this, task -> {
             if (task.isSuccessful()) {
+                loginBtn.setVisibility(View.INVISIBLE);
+                googleSignBtn.setVisibility(View.INVISIBLE);
+                loginProgress.setVisibility(View.VISIBLE);
                 startLoginProcess(task.getResult().getUser().getUid());
             } else {
                 Toast.makeText(this, "Login failed!", Toast.LENGTH_SHORT).show();
@@ -219,9 +222,21 @@ public class LoginActivity extends AppCompatActivity {
                 startActivity(intent);
                 finish();
             } else {
-                Toast.makeText(this, "Login failed!", Toast.LENGTH_SHORT).show();
+                googleSignBtn.setVisibility(View.VISIBLE);
+                loginBtn.setVisibility(View.VISIBLE);
+                loginProgress.setVisibility(View.INVISIBLE);
+
+                FirebaseAuth.getInstance().signOut();
+                Toast.makeText(this, "No account exists. Signup First.", Toast.LENGTH_SHORT).show();
             }
-        }).addOnFailureListener(e -> Toast.makeText(this, "Login failed!", Toast.LENGTH_SHORT).show());
+        }).addOnFailureListener(e -> {
+            googleSignBtn.setVisibility(View.VISIBLE);
+            loginBtn.setVisibility(View.VISIBLE);
+            loginProgress.setVisibility(View.INVISIBLE);
+
+            Toast.makeText(this, "Login failed!", Toast.LENGTH_SHORT).show();
+            FirebaseAuth.getInstance().signOut();
+        });
     }
 
     @Override

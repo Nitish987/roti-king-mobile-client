@@ -94,11 +94,22 @@
             android:textStyle="bold"
             android:layout_gravity="end" />
 
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp">
+
+            <com.google.android.material.progressindicator.CircularProgressIndicator
+                android:id="@+id/login_progress"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:indeterminate="true"
+                android:visibility="invisible"/>
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="20dp"
                 android:orientation="horizontal">
 
                 <com.google.android.gms.common.SignInButton
@@ -109,30 +120,18 @@
                     style="@style/Button"
                     android:layout_marginEnd="3dp" />
 
-                <RelativeLayout
+
+                <androidx.appcompat.widget.AppCompatButton
+                    android:id="@+id/login_btn"
+                    style="@style/Button"
                     android:layout_width="0dp"
                     android:layout_weight="1"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="3dp">
-
-                    <androidx.appcompat.widget.AppCompatButton
-                        android:id="@+id/login_btn"
-                        style="@style/Button"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="@string/login" />
-
-                    <com.google.android.material.progressindicator.CircularProgressIndicator
-                        android:id="@+id/login_progress"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_centerInParent="true"
-                        android:indeterminate="true"
-                        android:visibility="invisible"/>
-
-                </RelativeLayout>
+                    android:layout_height="50dp"
+                    android:text="@string/login" />
 
             </LinearLayout>
+
+        </RelativeLayout>
 
         <TextView
             android:id="@+id/signup_txt"

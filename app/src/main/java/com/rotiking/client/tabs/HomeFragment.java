@@ -82,11 +82,11 @@ public class HomeFragment extends Fragment {
             foodItemProgress.setVisibility(View.GONE);
             foodFilters.setEnabled(true);
 
-            FoodCardRecyclerAdapter cardAdapter = new FoodCardRecyclerAdapter(foods, getChildFragmentManager());
+            FoodCardRecyclerAdapter cardAdapter = new FoodCardRecyclerAdapter(foods, getParentFragmentManager());
             foodsCardRV.setAdapter(cardAdapter);
 
             List<Food> foodItems = performTop10FoodQuery();
-            FoodItemRecyclerAdapter itemAdapter = new FoodItemRecyclerAdapter(foodItems, getChildFragmentManager());
+            FoodItemRecyclerAdapter itemAdapter = new FoodItemRecyclerAdapter(foodItems, getParentFragmentManager());
             foodsRV.setAdapter(itemAdapter);
         }).addOnFailureListener(e -> Toast.makeText(view.getContext(), "Unable to load Item.", Toast.LENGTH_SHORT).show());
 

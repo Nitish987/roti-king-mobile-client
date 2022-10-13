@@ -173,6 +173,7 @@ public class SignupActivity extends AppCompatActivity {
                 @Override
                 public void reject(String err) {
                     continueBtn.setVisibility(View.VISIBLE);
+                    Toast.makeText(SignupActivity.this, err, Toast.LENGTH_SHORT).show();
                 }
             });
         });
@@ -182,6 +183,11 @@ public class SignupActivity extends AppCompatActivity {
             Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(intent);
             try {
                 GoogleSignInAccount account = task.getResult(ApiException.class);
+
+                googleSignBtn.setVisibility(View.GONE);
+                continueBtn.setVisibility(View.GONE);
+                continueProgress.setVisibility(View.VISIBLE);
+
                 firebaseAuthWithGoogle(account.getIdToken());
             } catch (ApiException e) {
                 Toast.makeText(this, "Signup failed!", Toast.LENGTH_LONG).show();
@@ -203,8 +209,11 @@ public class SignupActivity extends AppCompatActivity {
                 FirebaseUser user = task.getResult().getUser();
                 Database.getInstance().collection("user_exists").document(user.getEmail()).get().addOnSuccessListener(snapshot -> {
                     if (snapshot.exists()) {
-                        Auth.getInstance().signOut();
+                        continueProgress.setVisibility(View.INVISIBLE);
+                        googleSignBtn.setVisibility(View.VISIBLE);
+                        continueBtn.setVisibility(View.VISIBLE);
                         Toast.makeText(this, "Account already exists with this email. Try again with another email.", Toast.LENGTH_SHORT).show();
+                        Auth.getInstance().signOut();
                     } else {
                         Database.getInstance().collection("app").document("account").get().addOnSuccessListener(documentSnapshot -> {
                             if (documentSnapshot.exists()){
@@ -216,33 +225,52 @@ public class SignupActivity extends AppCompatActivity {
                                         user.getEmail(),
                                         new Promise<String>() {
                                             @Override
-                                            public void resolving(int progress, String msg) {}
+                                            public void resolving(int progress, String msg) {
+                                                continueProgress.setVisibility(View.VISIBLE);
+                                            }
 
                                             @Override
                                             public void resolved(String msg) {
-                                                Auth.getInstance().signOut();
+                                                continueProgress.setVisibility(View.INVISIBLE);
                                                 Toast.makeText(SignupActivity.this, msg, Toast.LENGTH_SHORT).show();
+                                                Auth.getInstance().signOut();
                                                 finish();
                                             }
 
                                             @Override
                                             public void reject(String err) {
-                                                Auth.getInstance().signOut();
+                                                continueProgress.setVisibility(View.INVISIBLE);
+                                                googleSignBtn.setVisibility(View.VISIBLE);
+                                                continueBtn.setVisibility(View.VISIBLE);
+
                                                 Toast.makeText(SignupActivity.this, err, Toast.LENGTH_SHORT).show();
+                                                Auth.getInstance().signOut();
                                             }
                                         }
                                 );
                             }
                         }).addOnFailureListener(e -> {
-                            Auth.getInstance().signOut();
+                            continueProgress.setVisibility(View.INVISIBLE);
+                            googleSignBtn.setVisibility(View.VISIBLE);
+                            continueBtn.setVisibility(View.VISIBLE);
+
                             Toast.makeText(this, "Signup failed!", Toast.LENGTH_SHORT).show();
+                            Auth.getInstance().signOut();
                         });
                     }
                 }).addOnFailureListener(e -> {
-                    Auth.getInstance().signOut();
+                    continueProgress.setVisibility(View.INVISIBLE);
+                    googleSignBtn.setVisibility(View.VISIBLE);
+                    continueBtn.setVisibility(View.VISIBLE);
+
                     Toast.makeText(this, "Signup failed!", Toast.LENGTH_SHORT).show();
+                    Auth.getInstance().signOut();
                 });
             } else {
+                continueProgress.setVisibility(View.INVISIBLE);
+                googleSignBtn.setVisibility(View.VISIBLE);
+                continueBtn.setVisibility(View.VISIBLE);
+
                 Toast.makeText(this, "Signup failed!", Toast.LENGTH_SHORT).show();
             }
         });

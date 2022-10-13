@@ -51,10 +51,6 @@ public class Auth {
         return null;
     }
 
-    public static void setAuthStateListener(FirebaseAuth.AuthStateListener listener) {
-        FirebaseAuth.getInstance().addAuthStateListener(listener);
-    }
-
     public static FirebaseAuth getInstance() {
         return FirebaseAuth.getInstance();
     }
