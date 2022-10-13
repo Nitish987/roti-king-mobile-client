@@ -128,4 +128,6 @@
         <item>Account related Issue</item>
         <item>Account Deletion Issue</item>
     </string-array>
+    <string name="title_activity_maps">Rotiking Delivery Tracking</string>
+    <string name="track_delivery">Track Delivery</string>
 </resources>

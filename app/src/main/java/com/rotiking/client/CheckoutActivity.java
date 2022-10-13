@@ -218,6 +218,7 @@ public class CheckoutActivity extends AppCompatActivity implements PaymentResult
 
         Order order = new Order(
                 addressPO,
+                null,
                 "",
                 "",
                 "",

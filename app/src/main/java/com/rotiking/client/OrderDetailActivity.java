@@ -6,6 +6,7 @@ import androidx.appcompat.widget.AppCompatButton;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.view.View;
@@ -35,7 +36,7 @@ public class OrderDetailActivity extends AppCompatActivity {
     private RecyclerView orderItemRV;
     private ImageButton closeBtn;
     private TextView itemsTxt, orderNumberTxt, totalCartPriceTxt, deliveryCartPriceTxt, totalPayableTxt, nameTxt, phoneTxt, addressTxt, agentNameTxt, agentPhoneTxt, timeTxt, paymentMethodTxt;
-    private AppCompatButton cancelOrderBtn;
+    private AppCompatButton cancelOrderBtn, trackDeliveryBtn;
     private LinearProgressIndicator orderStateIndicator;
     private TextView orderedStateTxt, orderedState, cookingState, dispatchedState, onWayState, deliveredState, deliveryCodeTxt;
     private LinearLayout deliveryAgentDesk, deliveryVerificationDesk;
@@ -75,6 +76,7 @@ public class OrderDetailActivity extends AppCompatActivity {
         deliveredState = findViewById(R.id.delivered_state);
         deliveryVerificationDesk = findViewById(R.id.delivery_verification_desk);
         deliveryCodeTxt = findViewById(R.id.delivery_verification_code);
+        trackDeliveryBtn = findViewById(R.id.track_delivery_btn);
 
         orderItemRV = findViewById(R.id.ordered_item_rv);
         orderItemRV.setLayoutManager(new LinearLayoutManager(this, RecyclerView.VERTICAL, false));
@@ -208,6 +210,12 @@ public class OrderDetailActivity extends AppCompatActivity {
                     }
                 }
             }
+        });
+
+        trackDeliveryBtn.setOnClickListener(view -> {
+            Intent intent = new Intent(this, OrderTrackingActivity.class);
+            intent.putExtra("order_id", orderId);
+            startActivity(intent);
         });
 
         cancelOrderBtn.setOnClickListener(view -> {

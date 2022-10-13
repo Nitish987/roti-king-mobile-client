@@ -18,6 +18,11 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.RotiKing"
         tools:targetApi="31">
+
+        <activity
+            android:name=".OrderTrackingActivity"
+            android:exported="false"
+            android:label="@string/title_activity_maps" />
         <activity
             android:name=".HelpSupportActivity"
             android:exported="false" />
@@ -99,6 +104,9 @@
         <meta-data
             android:name="com.google.firebase.messaging.default_notification_color"
             android:resource="@color/red" />
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="${MAPS_API_KEY}" />
     </application>
 
 </manifest>

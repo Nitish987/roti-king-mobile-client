@@ -7,6 +7,7 @@ import java.util.List;
 
 public class Order implements Serializable {
     private String address;
+    private GeoPoint agentLocation;
     private String agentName;
     private String agentPhone;
     private String agentUid;
@@ -30,8 +31,9 @@ public class Order implements Serializable {
 
     public Order() {}
 
-    public Order(String address, String agentName, String agentPhone, String agentUid, List<CartItem> items, int deliveryPrice, int discount, GeoPoint location, String name, String orderId, int orderNumber, int orderState, boolean orderSuccess, int payablePrice, String paymentMethod, String paymentOrderID, String phone, String secureNumber, long time, int totalPrice, String uid) {
+    public Order(String address, GeoPoint agentLocation, String agentName, String agentPhone, String agentUid, List<CartItem> items, int deliveryPrice, int discount, GeoPoint location, String name, String orderId, int orderNumber, int orderState, boolean orderSuccess, int payablePrice, String paymentMethod, String paymentOrderID, String phone, String secureNumber, long time, int totalPrice, String uid) {
         this.address = address;
+        this.agentLocation = agentLocation;
         this.agentName = agentName;
         this.agentPhone = agentPhone;
         this.agentUid = agentUid;
@@ -220,5 +222,13 @@ public class Order implements Serializable {
 
     public void setPaymentOrderID(String paymentOrderID) {
         this.paymentOrderID = paymentOrderID;
+    }
+
+    public GeoPoint getAgentLocation() {
+        return agentLocation;
+    }
+
+    public void setAgentLocation(GeoPoint agentLocation) {
+        this.agentLocation = agentLocation;
     }
 }
