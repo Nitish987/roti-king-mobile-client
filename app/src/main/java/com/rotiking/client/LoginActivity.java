@@ -6,6 +6,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.AppCompatButton;
 
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -22,7 +23,9 @@ import com.google.android.gms.common.SignInButton;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthCredential;
+import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
 import com.rotiking.client.common.auth.Auth;
 import com.rotiking.client.common.auth.AuthPreferences;
@@ -34,7 +37,7 @@ import com.google.android.material.progressindicator.CircularProgressIndicator;
 
 public class LoginActivity extends AppCompatActivity {
     private AppCompatButton loginBtn;
-    private TextView signupTxt, forgetPasswordTxt;
+    private TextView signupTxt, forgetPasswordTxt, termsPrivacy;
     private EditText email_eTxt, password_eTxt;
     private CircularProgressIndicator loginProgress;
     private SignInButton googleSignBtn;
@@ -55,6 +58,7 @@ public class LoginActivity extends AppCompatActivity {
         loginProgress = findViewById(R.id.login_progress);
         forgetPasswordTxt = findViewById(R.id.forget_password);
         googleSignBtn = findViewById(R.id.google_sign_in_btn);
+        termsPrivacy = findViewById(R.id.terms_privacy);
 
         auth = FirebaseAuth.getInstance();
 
@@ -173,25 +177,12 @@ public class LoginActivity extends AppCompatActivity {
             }
         });
 
-        googleSignBtn.setOnClickListener(v -> signIn());
-    }
+        googleSignBtn.setOnClickListener(v -> googleSignIn());
 
-    private void signIn() {
-        Intent signInIntent = mGoogleSignInClient.getSignInIntent();
-        googleResultIntent.launch(signInIntent);
-    }
-
-    private void firebaseAuthWithGoogle(String idToken) {
-        AuthCredential credential = GoogleAuthProvider.getCredential(idToken, null);
-        auth.signInWithCredential(credential).addOnCompleteListener(this, task -> {
-            if (task.isSuccessful()) {
-                loginBtn.setVisibility(View.INVISIBLE);
-                googleSignBtn.setVisibility(View.INVISIBLE);
-                loginProgress.setVisibility(View.VISIBLE);
-                startLoginProcess(task.getResult().getUser().getUid());
-            } else {
-                Toast.makeText(this, "Login failed!", Toast.LENGTH_SHORT).show();
-            }
+        termsPrivacy.setOnClickListener(view -> {
+            Intent i = new Intent(Intent.ACTION_VIEW);
+            i.setData(Uri.parse("https://rotiking.co.in/privacy/"));
+            startActivity(i);
         });
     }
 
@@ -227,7 +218,7 @@ public class LoginActivity extends AppCompatActivity {
                 loginProgress.setVisibility(View.INVISIBLE);
 
                 FirebaseAuth.getInstance().signOut();
-                Toast.makeText(this, "No account exists. Signup First.", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "No account found.", Toast.LENGTH_SHORT).show();
             }
         }).addOnFailureListener(e -> {
             googleSignBtn.setVisibility(View.VISIBLE);
@@ -236,6 +227,89 @@ public class LoginActivity extends AppCompatActivity {
 
             Toast.makeText(this, "Login failed!", Toast.LENGTH_SHORT).show();
             FirebaseAuth.getInstance().signOut();
+        });
+    }
+
+    private void googleSignIn() {
+        Intent signInIntent = mGoogleSignInClient.getSignInIntent();
+        googleResultIntent.launch(signInIntent);
+    }
+
+    private void firebaseAuthWithGoogle(String idToken) {
+        AuthCredential credential = GoogleAuthProvider.getCredential(idToken, null);
+        auth.signInWithCredential(credential).addOnCompleteListener(this, task -> {
+            if (task.isSuccessful()) {
+                loginBtn.setVisibility(View.INVISIBLE);
+                googleSignBtn.setVisibility(View.INVISIBLE);
+                loginProgress.setVisibility(View.VISIBLE);
+
+                startGoogleSignInProcess(task);
+            } else {
+                Toast.makeText(this, "Sign in failed!", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private void startGoogleSignInProcess(Task<AuthResult> task) {
+        FirebaseUser user = task.getResult().getUser();
+        Database.getInstance().collection("user_exists").document(user.getEmail()).get().addOnSuccessListener(snapshot -> {
+            if (snapshot.exists()) {
+                loginProgress.setVisibility(View.INVISIBLE);
+                googleSignBtn.setVisibility(View.VISIBLE);
+                loginBtn.setVisibility(View.VISIBLE);
+
+                startLoginProcess(user.getUid());
+            } else {
+                Database.getInstance().collection("app").document("account").get().addOnSuccessListener(documentSnapshot -> {
+                    if (documentSnapshot.exists()){
+                        Auth.Signup.googleSignupCreation(
+                                this,
+                                documentSnapshot.get("googleSignInKey", String.class),
+                                user.getUid(),
+                                user.getDisplayName(),
+                                user.getEmail(),
+                                new Promise<String>() {
+                                    @Override
+                                    public void resolving(int progress, String msg) {
+                                        loginProgress.setVisibility(View.VISIBLE);
+                                    }
+
+                                    @Override
+                                    public void resolved(String msg) {
+                                        loginProgress.setVisibility(View.VISIBLE);
+                                        Toast.makeText(LoginActivity.this, msg, Toast.LENGTH_SHORT).show();
+
+                                        startLoginProcess(user.getUid());
+                                    }
+
+                                    @Override
+                                    public void reject(String err) {
+                                        loginProgress.setVisibility(View.INVISIBLE);
+                                        googleSignBtn.setVisibility(View.VISIBLE);
+                                        loginBtn.setVisibility(View.VISIBLE);
+
+                                        Toast.makeText(LoginActivity.this, err, Toast.LENGTH_SHORT).show();
+                                        Auth.getInstance().signOut();
+                                    }
+                                }
+                        );
+                    }
+                }).addOnFailureListener(e -> {
+                    loginProgress.setVisibility(View.INVISIBLE);
+                    googleSignBtn.setVisibility(View.VISIBLE);
+                    loginBtn.setVisibility(View.VISIBLE);
+
+                    Toast.makeText(this, "Sign in failed!", Toast.LENGTH_SHORT).show();
+                    Auth.getInstance().signOut();
+                });
+            }
+        }).addOnFailureListener(e -> {
+            loginProgress.setVisibility(View.INVISIBLE);
+            googleSignBtn.setVisibility(View.VISIBLE);
+            loginBtn.setVisibility(View.VISIBLE);
+
+            Toast.makeText(this, "Sign in failed!", Toast.LENGTH_SHORT).show();
+            Auth.getInstance().signOut();
         });
     }
 

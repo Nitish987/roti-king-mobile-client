@@ -3,6 +3,8 @@ package com.rotiking.client;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.AppCompatButton;
 
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -23,6 +25,7 @@ public class HelpSupportActivity extends AppCompatActivity {
     private Spinner type;
     private AppCompatButton send;
     private ImageButton close;
+    private TextView termsPrivacy;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,6 +37,7 @@ public class HelpSupportActivity extends AppCompatActivity {
         message = findViewById(R.id.message);
         send = findViewById(R.id.send);
         close = findViewById(R.id.close);
+        termsPrivacy = findViewById(R.id.terms_privacy);
     }
 
     @Override
@@ -75,6 +79,12 @@ public class HelpSupportActivity extends AppCompatActivity {
                 Toast.makeText(this, "Message sent Successfully.", Toast.LENGTH_SHORT).show();
                 finish();
             }).addOnFailureListener(e -> Toast.makeText(this, "Unable to send Message.", Toast.LENGTH_SHORT).show());
+        });
+
+        termsPrivacy.setOnClickListener(view -> {
+            Intent i = new Intent(Intent.ACTION_VIEW);
+            i.setData(Uri.parse("https://rotiking.co.in/privacy/"));
+            startActivity(i);
         });
 
         close.setOnClickListener(view -> finish());

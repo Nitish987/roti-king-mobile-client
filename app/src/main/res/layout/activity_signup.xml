@@ -98,6 +98,13 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp">
 
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/continue_btn"
+                style="@style/Button"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:text="@string/continue_" />
+
             <com.google.android.material.progressindicator.CircularProgressIndicator
                 android:id="@+id/continue_progress"
                 android:layout_width="wrap_content"
@@ -105,30 +112,6 @@
                 android:layout_centerInParent="true"
                 android:indeterminate="true"
                 android:visibility="invisible"/>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal">
-
-                <com.google.android.gms.common.SignInButton
-                    android:id="@+id/google_sign_btn"
-                    android:layout_width="0dp"
-                    android:layout_weight="1"
-                    android:layout_height="50dp"
-                    style="@style/Button"
-                    android:layout_marginEnd="3dp" />
-
-
-                <androidx.appcompat.widget.AppCompatButton
-                    android:id="@+id/continue_btn"
-                    style="@style/Button"
-                    android:layout_width="0dp"
-                    android:layout_weight="1"
-                    android:layout_height="50dp"
-                    android:text="@string/continue_" />
-
-            </LinearLayout>
 
         </RelativeLayout>
 

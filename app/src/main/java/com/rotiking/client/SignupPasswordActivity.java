@@ -4,6 +4,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.AppCompatButton;
 
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -24,7 +25,7 @@ public class SignupPasswordActivity extends AppCompatActivity {
 
     private TextView titleTxt, messageTxt, resentOtp;
     private LinearLayout otpSection, passwordSection, confirmPasswordSection;
-    private EditText otp_eTxt, password_eTxt, confirmPassword_eTxt;
+    private EditText otp_eTxt, password_eTxt, confirmPassword_eTxt, termsPrivacy;
     private AppCompatButton signupBtn;
     private CircularProgressIndicator signupProgress;
 
@@ -47,6 +48,7 @@ public class SignupPasswordActivity extends AppCompatActivity {
         signupBtn = findViewById(R.id.sign_up_btn);
         signupProgress = findViewById(R.id.sign_up_progress);
         resentOtp = findViewById(R.id.resent_otp);
+        termsPrivacy = findViewById(R.id.terms_privacy);
 
         message = getIntent().getStringExtra("message");
         token = getIntent().getStringExtra("token");
@@ -212,6 +214,12 @@ public class SignupPasswordActivity extends AppCompatActivity {
                 @Override
                 public void reject(String err) {}
             });
+        });
+
+        termsPrivacy.setOnClickListener(view -> {
+            Intent i = new Intent(Intent.ACTION_VIEW);
+            i.setData(Uri.parse("https://rotiking.co.in/privacy/"));
+            startActivity(i);
         });
     }
 }
