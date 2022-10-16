@@ -23,9 +23,9 @@ import org.json.JSONObject;
 
 public class SignupPasswordActivity extends AppCompatActivity {
 
-    private TextView titleTxt, messageTxt, resentOtp;
+    private TextView titleTxt, messageTxt, resentOtp, termsPrivacy;
     private LinearLayout otpSection, passwordSection, confirmPasswordSection;
-    private EditText otp_eTxt, password_eTxt, confirmPassword_eTxt, termsPrivacy;
+    private EditText otp_eTxt, password_eTxt, confirmPassword_eTxt;
     private AppCompatButton signupBtn;
     private CircularProgressIndicator signupProgress;
 
