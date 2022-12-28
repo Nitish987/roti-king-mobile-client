@@ -1,4 +1,4 @@
 # RotiKing Android App
 A food ordering application with payment gateway.
 
-copyright @ Nitish Kumar 2022
+By Nitish Kumar 2022
